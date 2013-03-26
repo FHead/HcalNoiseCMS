@@ -1,0 +1,150 @@
+#include <cmath>
+#include <iostream>
+
+#include "AutoH1D.h"
+#include "AutoH2D.h"
+#include "AutoH3D.h"
+#include "AutoNtuple.h"
+
+#include "CycledH1D.h"
+#include "CycledH2D.h"
+#include "CycledH3D.h"
+#include "CycledNtuple.h"
+
+#include "Functors.h"
+#include "time_stamp.h"
+
+
+template <class Options, class RootMadeClass>
+Int_t ExampleAnalysis<Options,RootMadeClass>::Cut(Long64_t /* entry */)
+{
+    // return  1 if entry is accepted.
+    // return -1 otherwise.
+    return 1;
+}
+
+
+template <class Options, class RootMadeClass>
+Bool_t ExampleAnalysis<Options,RootMadeClass>::Notify()
+{
+    // The Notify() function is called when a new file is opened. This
+    // can be either for a new TTree in a TChain or when when a new TTree
+    // is started when using PROOF.
+    if (verbose_)
+    {
+        TChain* chain = dynamic_cast<TChain*>(this->fChain);
+        if (chain)
+            std::cout << time_stamp()
+                      << ": Processing file \"" << chain->GetFile()->GetName()
+                      << '"' << std::endl;
+    }
+    return kTRUE;
+}
+
+
+template <class Options, class RootMadeClass>
+int ExampleAnalysis<Options,RootMadeClass>::beginJob()
+{
+    if (verbose_)
+        std::cout << "Analysis options are: " << options_ << std::endl;
+
+    bookManagedHistograms();
+
+    // Verify that all requested items (histograms, ntuples) were
+    // successfully created
+    return !manager_.verifyHistoRequests();
+}
+
+
+template <class Options, class RootMadeClass>
+int ExampleAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
+{
+    fillManagedHistograms();
+    return 0;
+}
+
+
+template <class Options, class RootMadeClass>
+int ExampleAnalysis<Options,RootMadeClass>::endJob()
+{
+    return 0;
+}
+
+
+template <class Options, class RootMadeClass>
+void ExampleAnalysis<Options,RootMadeClass>::bookManagedHistograms()
+{
+    // In this method, we book histograms and ntuples which inherit
+    // from ManagedHisto and managed by HistogramManager. Management
+    // is established by calling the "manage" method of the HistogramManager.
+    // Managed histograms and ntuples will be automatically filled,
+    // written out, and eventually destroyed, so we don't have to do
+    // anything else about histograms themselves inside this class.
+    // We do, however, have to make sure that the manager's "AutoFill"
+    // and "CycleFill" methods are called as appropriate. This is done
+    // inside the "fillManagedHistograms" method which should be modified
+    // if you group your histograms in some non-trivial manner.
+
+    //
+    // Book 1-d histogram
+    //
+    if (manager_.isRequested("HBETMagnitude"))
+        manager_.manage(AutoH1D("HBETMagnitude",
+                         "Magnitude of the vector sum of rechits "
+                         "in the hcal barrel",
+                         "1-d", "Et", "Events",
+                         200, 0.0, 1000.0,
+                         Apply(hypot, this->HBET[0], this->HBET[1]), Double(1)));
+
+    //
+    // Book 2-d histogram
+    //
+    if (manager_.isRequested("NPV_HPDHits"))
+        manager_.manage(AutoH2D("NumberOfGoodPrimaryVertices_HPDHits",
+                         "Number of Good Primary Vertices and N HPD Hits",
+                         "2-d", "N PV", "N HPD Hits", "Events",
+                         100, -0.5, 99.5,
+                         20, -0.5, 19.5,
+                         ValueOf(this->NumberOfGoodPrimaryVertices),
+                         ValueOf(this->HPDHits), Double(1)));
+
+    //
+    // Book 3-d histogram
+    //
+    if (manager_.isRequested("NPV_HPDHits_HPDNoOtherHits"))
+        manager_.manage(AutoH3D("NumberOfGoodPrimaryVertices_HPDHits_HPDNoOtherHits",
+                         "Number of Good Primary Vertices and Various HPD Hits",
+                         "3-d", "N PV", "N HPD Hits", "N HPD Hits (no other)",
+                         "Events",
+                         100, -0.5, 99.5,
+                         20, -0.5, 19.5,
+                         20, -0.5, 19.5,
+                         ValueOf(this->NumberOfGoodPrimaryVertices),
+                         ValueOf(this->HPDHits), ValueOf(this->HPDNoOtherHits),
+                         Double(1)));
+
+    //
+    // Book an ntuple to store results of various calculations.
+    //
+    // "TreeDatum" is just a macro which creates a corresponding
+    // column assuming that the variable with the given name exists
+    // in this class or in one of its bases.
+    //
+    if (manager_.isRequested("ResultNtuple"))
+        manager_.manage(AutoNtuple("ResultNtuple", "Result Ntuple", "Ntuples",
+                 std::make_tuple(
+                     TreeDatum(NumberOfGoodPrimaryVertices),
+                     Column("HPDHits", ValueOf(this->HPDHits)),
+                     TreeDatum(HPDNoOtherHits)
+                 )));
+}
+
+
+template <class Options, class RootMadeClass>
+void ExampleAnalysis<Options,RootMadeClass>::fillManagedHistograms()
+{
+    // Don't forget to call the "AutoFill" and, possibly, "CycleFill"
+    // methods of the manager. Managed histograms will be filled there.
+    manager_.AutoFill();
+    // manager_.CycleFill(nCycles);
+}

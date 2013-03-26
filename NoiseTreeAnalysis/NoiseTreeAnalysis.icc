@@ -1,0 +1,895 @@
+#include <cmath>
+#include <iostream>
+#include <numeric>
+#include <cstring>
+#include <cstdio>
+#include <algorithm>
+
+#include "AutoH1D.h"
+#include "AutoH2D.h"
+#include "AutoH3D.h"
+#include "AutoNtuple.h"
+
+#include "CycledH1D.h"
+#include "CycledH2D.h"
+#include "CycledH3D.h"
+#include "CycledNtuple.h"
+
+#include "Functors.h"
+#include "Filter10.h"
+#include "time_stamp.h"
+
+#include "npstat/wrap/stringArchiveIO.hh"
+#include "geners/Reference.hh"
+
+
+namespace {
+    double first_fraction(double x1, double x2)
+    {
+        const double sum = x1 + x2;
+        if (sum)
+            return x1/sum;
+        else
+            return 0.0;
+    }
+}
+
+
+template <class Options, class RootMadeClass>
+Int_t NoiseTreeAnalysis<Options,RootMadeClass>::Cut(Long64_t /* entry */)
+{
+    // return  1 if entry is accepted.
+    // return -1 otherwise.
+    if (this->NumberOfGoodPrimaryVertices > 0 &&
+        this->NumberOfGoodTracks > 0)
+        return 1;
+    else
+        return -1;
+}
+
+
+template <class Options, class RootMadeClass>
+Bool_t NoiseTreeAnalysis<Options,RootMadeClass>::Notify()
+{
+    // The Notify() function is called when a new file is opened. This
+    // can be either for a new TTree in a TChain or when when a new TTree
+    // is started when using PROOF.
+    if (verbose_)
+    {
+        TChain* chain = dynamic_cast<TChain*>(this->fChain);
+        if (chain)
+            std::cout << time_stamp()
+                      << ": Processing file \"" << chain->GetFile()->GetName()
+                      << '"' << std::endl;
+    }
+    return kTRUE;
+}
+
+
+template <class Options, class RootMadeClass>
+void NoiseTreeAnalysis<Options,RootMadeClass>::loadOccupancyConverters()
+{
+    if (!options_.convertersGSSAFile.empty())
+    {
+        gs::StringArchive* ar = npstat::readCompressedStringArchive(
+            options_.convertersGSSAFile.c_str());
+        occupancyCoverters_.reserve(HBHEChannelMap::ChannelCount);
+ 
+        // Load the converter for each channel
+        char buf[12];
+        for (unsigned i=0; i<HBHEChannelMap::ChannelCount; ++i)
+        {
+            sprintf(buf, "%u", i);
+            gs::Reference<npstat::LeftCensoredDistribution> ref(*ar, buf, "");
+            assert(ref.unique());
+            occupancyCoverters_.push_back(ref.getShared(0));
+        }
+    }
+}
+
+
+template <class Options, class RootMadeClass>
+double NoiseTreeAnalysis<Options,RootMadeClass>::weightedSignalTimeSlice(
+    const unsigned hpd) const
+{
+    const std::vector<unsigned>& channels(hpdChannelsReadOut_[hpd]);
+    const unsigned nChannels = channels.size();
+    double wsum = 0.0, tsum = 0.0;
+    for (unsigned i=0; i<nChannels; ++i)
+    {
+        const int pulse = pulseNumber_[channels[i]];
+        wsum += filterSums_[pulse];
+        tsum += filterSums_[pulse] * startingSlice_[pulse];
+    }
+    if (wsum > 0.0)
+        return tsum/wsum;
+    else
+        return -1.0;
+}
+
+
+template <class Options, class RootMadeClass>
+int NoiseTreeAnalysis<Options,RootMadeClass>::beginJob()
+{
+    if (verbose_)
+        std::cout << "Analysis options are: " << options_ << std::endl;
+
+    for (int i=0; i<HcalHPDRBXMap::NUM_HPDS; ++i)
+    {
+        hpdChannelsReadOut_[i].reserve(channelMap_.getHPDChannels(i).size());
+        hpdNeighbors_[i].reserve(channelMap_.getHPDNeigbors(i).size());
+    }
+
+    loadOccupancyConverters();
+    bookManagedHistograms();
+    return !manager_.verifyHistoRequests();
+}
+
+
+template <class Options, class RootMadeClass>
+double NoiseTreeAnalysis<Options,RootMadeClass>::calculatePseudoLogLikelihood(
+    const std::vector<unsigned>& channels) const
+{
+    double pseudoLogli = 0.0;
+    if (!occupancyCoverters_.empty())
+    {
+        unsigned nGood = 0;
+        const unsigned nChannels = channels.size();
+        for (unsigned i=0; i<nChannels; ++i)
+        {
+            const unsigned chan = channels[i];
+            const double vfrac = occupancyCoverters_[chan]->visibleFraction();
+            if (vfrac > 0.0)
+            {
+                ++nGood;
+                const int iPulse = pulseNumber_[chan];
+                if (iPulse >= 0)
+                {
+                    double logdelta = -options_.maxLogContribution;
+                    const double ex = occupancyCoverters_[chan]->exceedance(
+                        this->Energy[iPulse]);
+                    if (ex > 0.0)
+                    {
+                        logdelta = log(ex/vfrac);
+                        if (std::abs(logdelta) > options_.maxLogContribution)
+                            logdelta = -options_.maxLogContribution;
+                    }
+                    pseudoLogli += logdelta;
+                }
+            }
+        }
+        if (nGood > 0)
+            pseudoLogli /= nGood;
+    }
+    return pseudoLogli;
+}
+
+
+template <class Options, class RootMadeClass>
+int NoiseTreeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
+{
+    // Initialize various maps and arrays
+    memset(hpdEnergy_, 0, sizeof(hpdEnergy_));
+    memset(rbxOccupancy_, 0, sizeof(rbxOccupancy_));
+
+    for (unsigned i=0; i<HBHEChannelMap::ChannelCount; ++i)
+        pulseNumber_[i] = -1;
+
+    for (int i=0; i<HcalHPDRBXMap::NUM_HPDS; ++i)
+        hpdChannelsReadOut_[i].clear();
+
+    // Filter for determining the start time of the pulse.
+    // For the moment, it is just the "wide derivative" filter.
+    const double tFilter[] = {-1, -1, 1, 1};  const int t0 = -2;
+    Filter10 filter(tFilter, sizeof(tFilter)/sizeof(tFilter[0]), t0);
+    double filtered[10];
+
+    // Cycle over channel data
+    for (Int_t i=0; i<this->PulseCount; ++i)
+    {
+        // Determine an remember the channel number for the given "pulse"
+        const unsigned chNum = channelMap_.linearIndex(
+            this->Depth[i], this->IEta[i], this->IPhi[i]);
+        channelNumber_[i] = chNum;
+
+        // Mapping from channel numbers to pulse numbers.
+        // Pulse numbers are initialized to -1 (invalid)
+        pulseNumber_[chNum] = i;
+
+        // Get the HPD number from the channel number
+        // and accumulate HPD energies. Also, fill the
+        // vector of channels found for this HPD.
+        const unsigned hpdNum = channelMap_.getHPD(chNum);
+        hpdNumber_[i] = hpdNum;
+        chanInHpdNumber_[i] = channelMap_.getChannelInHPD(chNum);
+        hpdChannelsReadOut_[hpdNum].push_back(chNum);
+        hpdEnergy_[hpdNum] += this->Energy[i];
+
+        // Get the RBX number from the channel number
+        const unsigned rbxNum = channelMap_.getRBX(chNum);
+        rbxNumber_[i] = rbxNum;
+        chanInRbxNumber_[i] = channelMap_.getChannelInRBX(chNum);
+        rbxOccupancy_[rbxNum] += 1.0;
+
+        // Integrate the charge
+        const double* charge = &this->Charge[i][0];
+        chargeSums_[i] = std::accumulate(charge, charge+nTimeSlices, 0.0);
+        integSums_[i] = std::accumulate(
+            charge+options_.minTSlice, charge+options_.maxTSlice, 0.0);
+        if (chargeSums_[i] > 0.0)
+            signalFraction_[i] = integSums_[i]/chargeSums_[i];
+        else
+            signalFraction_[i] = -1.0;
+
+        // Integrate the pedestals
+        const double* ped = &this->Pedestal[i][0];
+        pedSums_[i] = std::accumulate(ped, ped+nTimeSlices, 0.0);
+        integPeds_[i] = std::accumulate(
+            ped+options_.minTSlice, ped+options_.maxTSlice, 0.0);
+
+        // Filter the pulse shape and determine the signal starting slice
+        filter.apply(charge, filtered);
+        startingSlice_[i] = std::max_element(filtered, filtered+10) - filtered;
+
+        // Charge sum in the time slices determined by the filter
+        unsigned maxSlice = startingSlice_[i]+options_.maxTSlice-options_.minTSlice;
+        if (maxSlice > 10) maxSlice = 10;
+        filterSums_[i] = std::accumulate(charge+startingSlice_[i],
+                                         charge+maxSlice, 0.0);
+    }
+
+    // Determine occupancies and sum energis over the channels
+    // belonging to each HPD and over channels neighboring each HPD
+    for (int hpd=0; hpd<HcalHPDRBXMap::NUM_HPDS; ++hpd)
+    {
+        // Fractional occupancy for the given HPD
+        const unsigned nReadSignal = hpdChannelsReadOut_[hpd].size();
+        const unsigned nChanInHPD = channelMap_.getHPDChannels(hpd).size();
+        hpdOccupancy_[hpd] = nReadSignal*1.0/nChanInHPD;
+
+        // Occupancy and energy for "static neighbors", i.e., channels
+        // bordering any of the channels in the given HPD, read out or not
+        unsigned nRead = 0;
+        double Esum = 0.0;
+        const std::vector<unsigned>& staticNeighbors = 
+            channelMap_.getHPDNeigbors(hpd);
+        const unsigned nStaticNeighbors = staticNeighbors.size();
+        for (unsigned i=0; i<nStaticNeighbors; ++i)
+        {
+            const int iPulse = pulseNumber_[staticNeighbors[i]];
+            if (iPulse >= 0)
+            {
+                Esum += this->Energy[iPulse];
+                ++nRead;
+            }
+        }
+        staticNeighborOccupancy_[hpd] = nRead*1.0/nStaticNeighbors;
+        staticNeighborEnergy_[hpd] = Esum;
+
+        // Occupancy for "dynamic neighbors", i.e., channels bordering
+        // any of the channels read out in the given HPD
+        Esum = 0.0;
+        channelMap_.channelSetNeighbors(
+            hpdChannelsReadOut_[hpd], &hpdNeighbors_[hpd]);
+        const std::vector<unsigned>& dynamicNeighbors(hpdNeighbors_[hpd]);
+        const unsigned nDynamicNeighbors = dynamicNeighbors.size();
+        if (nDynamicNeighbors)
+        {
+            nRead = 0;
+            for (unsigned i=0; i<nDynamicNeighbors; ++i)
+            {
+                const int iPulse = pulseNumber_[dynamicNeighbors[i]];
+                if (iPulse >= 0)
+                {
+                    Esum += this->Energy[iPulse];
+                    ++nRead;
+                }
+            }
+            dynamicNeighborOccupancy_[hpd] = nRead*1.0/nDynamicNeighbors;
+        }
+        else
+            dynamicNeighborOccupancy_[hpd] = 0.0;
+        dynamicNeighborEnergy_[hpd] = Esum;
+    }
+
+    // Normalize RBX occupancy to 1
+    for (int i=0; i<HcalHPDRBXMap::NUM_RBXS; ++i)
+        rbxOccupancy_[i] /= channelMap_.getRBXChannels(i).size();
+
+    fillManagedHistograms();
+    return 0;
+}
+
+
+template <class Options, class RootMadeClass>
+int NoiseTreeAnalysis<Options,RootMadeClass>::endJob()
+{
+    return 0;
+}
+
+
+template <class Options, class RootMadeClass>
+void NoiseTreeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
+{
+    const unsigned nPhiBins = options_.nPhiBins;
+    const unsigned maxChanInHpd = channelMap_.maxChannelsPerHPD();
+    const unsigned maxChanInRbx = channelMap_.maxChannelsPerRBX();
+
+    // In this method, we book histograms and ntuples which inherit
+    // from ManagedHisto and managed by HistogramManager. Management
+    // is established by calling the "manage" method of the HistogramManager.
+    // Managed histograms and ntuples will be automatically filled,
+    // written out, and eventually destroyed, so we don't have to do
+    // anything else about histograms themselves inside this class.
+    // We do, however, have to make sure that the manager's "AutoFill"
+    // and "CycleFill" methods are called as appropriate. This is done
+    // inside the "fillManagedHistograms" method which should be modified
+    // if you group your histograms in some non-trivial manner.
+
+    //
+    // Book histograms for various variables in the original ntuple
+    //
+    if (manager_.isRequested("EventCount"))
+        manager_.manage(AutoH1D("EventCount", "Event count as a histogram",
+                            "1-d", "Dummy", "Events",
+                            1, 0.0, 1.0, Double(0.5), Double(1)));
+
+#define book_rechits_sum_histos(varname, title) do {                            \
+    if (manager_.isRequested(#varname)) {                                       \
+        manager_.manage(AutoH1D(#varname "_Magnitude", title ", magnitude",     \
+                         "1-d", "Et", "Events",                                 \
+                         2000, 0.0, 2000.0,                                     \
+                         Apply(hypot, this->varname[0], this->varname[1]),      \
+                         Double(1)));                                           \
+        manager_.manage(AutoH1D(#varname "_Phi", title ", Et-weighted Phi",     \
+                         "1-d", "Phi", "Events",                                \
+                         nPhiBins, -M_PI, M_PI,                                 \
+                         Apply(atan2, this->varname[1], this->varname[0]),      \
+                            Apply(hypot, this->varname[0], this->varname[1])));}\
+} while(0);
+
+    book_rechits_sum_histos(EBET, "Vectorial sum of rechits in ecal barrel");
+    book_rechits_sum_histos(EEET, "Vectorial sum of rechits in ecal endcap");
+    book_rechits_sum_histos(HBET, "Vectorial sum of rechits in hcal barrel");
+    book_rechits_sum_histos(HEET, "Vectorial sum of rechits in hcal endcap");
+    book_rechits_sum_histos(HFET, "Vectorial sum of rechits in forward hcal");
+
+    if (manager_.isRequested("NominalMET"))
+    {
+        
+        manager_.manage(AutoH1D("NominalMET_Magnitude",
+                             "Reconstructed calo MET, magnitude",
+                             "1-d", "MET", "Events",
+                             2000, 0.0, 2000.0,
+                             Apply(hypot, this->NominalMET[0], this->NominalMET[1]),
+                             Double(1)));
+        
+        manager_.manage(AutoH1D("NominalMET_Phi",
+                             "Reconstructed calo MET, MET-weighted Phi",
+                             "1-d", "Phi", "Events",
+                             nPhiBins, -M_PI, M_PI,
+                             Apply(atan2, this->NominalMET[1], this->NominalMET[0]),
+                             Apply(hypot, this->NominalMET[0], this->NominalMET[1])));
+    }
+
+#define book_energy_histo(varname, limit, title) do {                     \
+    if (manager_.isRequested(#varname)) {                                 \
+        manager_.manage(AutoH1D(#varname, title, "1-d", "E Sum", "Events",\
+                         2000, 0.0, limit,                                \
+                         ValueOf(this->varname), Double(1)));}            \
+} while(0);
+
+    book_energy_histo(EBSumE, 4000.0, "Scalar sum of energy of rechits in ecal barrel");
+    book_energy_histo(EESumE, 4000.0, "Scalar sum of energy of rechits in ecal endcap");
+    book_energy_histo(HBSumE, 4000.0, "Scalar sum of energy of rechits in hcal barrel");
+    book_energy_histo(HESumE, 4000.0, "Scalar sum of energy of rechits in hcal endcap");
+    book_energy_histo(HFSumE, 40000.0,"Scalar sum of energy of rechits in forward hcal");
+
+#define book_Et_histo(varname, title) do {                                 \
+    if (manager_.isRequested(#varname)) {                                  \
+        manager_.manage(AutoH1D(#varname, title, "1-d", "Et Sum", "Events",\
+                         2000, 0.0, 4000.0,                                \
+                         ValueOf(this->varname), Double(1)));}             \
+} while(0);
+
+    book_Et_histo(EBSumET, "Scalar sum of Et of rechits in ecal barrel");
+    book_Et_histo(EESumET, "Scalar sum of Et of rechits in ecal endcap");
+    book_Et_histo(HBSumET, "Scalar sum of Et of rechits in hcal barrel");
+    book_Et_histo(HESumET, "Scalar sum of Et of rechits in hcal endcap");
+    book_Et_histo(HFSumET, "Scalar sum of Et of rechits in forward hcal");
+
+#define book_ntracks_histo(varname, nbins, title) do {                       \
+    if (manager_.isRequested(#varname)) {                                    \
+        manager_.manage(AutoH1D(#varname, title, "1-d", "N Tracks", "Events",\
+                         nbins, -0.5, nbins-0.5,                             \
+                         ValueOf(this->varname), Double(1)));}               \
+} while(0);
+
+    book_ntracks_histo(NumberOfGoodTracks, 4000,
+                      "Number of reconstructed tracks passing basic quality cut");
+    book_ntracks_histo(NumberOfGoodTracks15, 1000,
+                      "Number of good tracks with Pt > 1.5 GeV/c");
+    book_ntracks_histo(NumberOfGoodTracks30, 1000,
+                      "Number of good tracks with Pt > 3.0 GeV/c");
+
+    if (manager_.isRequested("TotalPTTracks"))
+    {
+        manager_.manage(AutoH1D("TotalPTTracks_Magnitude",
+                         "Vectorial sum of the transverse momenta of "
+                         "the tracks, magnitude",
+                         "1-d", "Pt", "Events",
+                         1000, 0.0, 2000.0,
+                         Apply(hypot, this->TotalPTTracks[0], this->TotalPTTracks[1]),
+                         Double(1)));
+
+        manager_.manage(AutoH1D("TotalPTTracks_Phi",
+                         "Vectorial sum of the transverse momenta of "
+                         "the tracks, Pt-weighted Phi",
+                         "1-d", "Phi", "Events",
+                         nPhiBins, -M_PI, M_PI,
+                         Apply(atan2, this->TotalPTTracks[1], this->TotalPTTracks[0]),
+                         Apply(hypot, this->TotalPTTracks[0], this->TotalPTTracks[1])));
+    }
+
+    if (manager_.isRequested("SumPTTracks"))
+        manager_.manage(AutoH1D("SumPTTracks",
+                         "Scalar sum of the transverse momenta of the tracks",
+                         "1-d", "Pt Sum", "Events",
+                         2000, 0.0, 10000.0,
+                         ValueOf(this->SumPTTracks), Double(1)));
+
+    if (manager_.isRequested("SumPTracks"))
+        manager_.manage(AutoH1D("SumPTracks",
+                         "Scalar sum of the momenta of the tracks",
+                         "1-d", "P Sum", "Events",
+                         2000, 0.0, 10000.0,
+                         ValueOf(this->SumPTracks), Double(1)));
+
+    if (manager_.isRequested("NumberOfGoodPrimaryVertices"))
+        manager_.manage(AutoH1D("NumberOfGoodPrimaryVertices",
+                         "Number of primary vertices passing basic quality cut",
+                         "1-d", "NPV", "Events",
+                         100, -0.5, 99.5,
+                         ValueOf(this->NumberOfGoodPrimaryVertices), Double(1)));
+
+    if (manager_.isRequested("NumberOfMuonCandidates"))
+        manager_.manage(AutoH1D("NumberOfMuonCandidates",
+                         "Size of the standard muon collection",
+                         "1-d", "N Mu", "Events",
+                         100, -0.5, 99.5,
+                         ValueOf(this->NumberOfMuonCandidates), Double(1)));
+
+    if (manager_.isRequested("NumberOfCosmicMuonCandidates"))
+        manager_.manage(AutoH1D("NumberOfCosmicMuonCandidates",
+                         "Size of the cosmic muon collection ",
+                         "1-d", "N Cosmic Mu", "Events",
+                         100, -0.5, 99.5,
+                         ValueOf(this->NumberOfCosmicMuonCandidates), Double(1)));
+
+    if (manager_.isRequested("PulseCount"))
+        manager_.manage(AutoH1D("PulseCount",
+                         "Number of HBHE channels written down in this event",
+                         "1-d", "N Channels", "Events",
+                         HBHEChannelMap::ChannelCount+1,-.5,HBHEChannelMap::ChannelCount+.5,
+                         ValueOf(this->PulseCount), Double(1)));
+
+    if (manager_.isRequested("HPDHits"))
+        manager_.manage(AutoH1D("HPDHits",
+                         "Maximum number of hits in an HPD in this event",
+                         "1-d", "N HPD Hits", "Events",
+                         20, -0.5, 19.5,
+                         ValueOf(this->HPDHits), Double(1)));
+
+    if (manager_.isRequested("HPDNoOtherHits"))
+        manager_.manage(AutoH1D("HPDNoOtherHits",
+                         "Maximum number of hits when other HPDs "
+                         "in the same RBX are silent",
+                         "1-d", "N HPD Hits", "Events",
+                         20, -0.5, 19.5,
+                         ValueOf(this->HPDNoOtherHits), Double(1)));
+
+    if (manager_.isRequested("MaxZeros"))
+        manager_.manage(AutoH1D("MaxZeros",
+                         "Maximum amount of ADC 0 counts in any RBX above 10 GeV",
+                         "1-d", "N ADC==0", "Events",
+                         50, -0.5, 49.5,
+                         ValueOf(this->MaxZeros), Double(1)));
+
+    if (manager_.isRequested("MinE2E10"))
+        manager_.manage(AutoH1D("MinE2E10",
+                         "Minimum value of (TS4+TS5)/(TS0+...+TS9) for RBXs above 50 GeV",
+                         "1-d", "Min E2/E10", "Events",
+                         140, -0.2, 1.2,
+                         ValueOf(this->MinE2E10), Double(1)));
+
+    if (manager_.isRequested("MaxE2E10"))
+        manager_.manage(AutoH1D("MaxE2E10",
+                         "Maximum value of (TS4+TS5)/(TS0+...+TS9) for RBXs above 50 GeV",
+                         "1-d", "Min E2/E10", "Events",
+                         140, -0.2, 1.2,
+                         ValueOf(this->MaxE2E10), Double(1)));
+
+    if (manager_.isRequested("LeadingJetEta"))
+        manager_.manage(AutoH1D("LeadingJetEta",
+                         "Eta of the leading jet",
+                         "1-d", "Eta", "Events",
+                         104, -5.2, 5.2,
+                         ValueOf(this->LeadingJetEta), Double(1)));
+
+    if (manager_.isRequested("LeadingJetPhi"))
+        manager_.manage(AutoH1D("LeadingJetPhi",
+                         "Phi of the leading jet",
+                         "1-d", "Phi", "Events",
+                         nPhiBins, -M_PI, M_PI,
+                         ValueOf(this->LeadingJetPhi), Double(1)));
+
+    if (manager_.isRequested("LeadingJetPt"))
+        manager_.manage(AutoH1D("LeadingJetPt",
+                         "Pt of the leading jet",
+                         "1-d", "Pt", "Events",
+                         2000, 0.0, 4000.0,
+                         ValueOf(this->LeadingJetPt), Double(1)));
+
+    if (manager_.isRequested("LeadingJetHad"))
+        manager_.manage(AutoH1D("LeadingJetHad",
+                         "Hadronic energy of the leading jet",
+                         "1-d", "E had", "Events",
+                         2000, 0.0, 4000.0,
+                         ValueOf(this->LeadingJetHad), Double(1)));
+
+    if (manager_.isRequested("LeadingJetEM"))
+        manager_.manage(AutoH1D("LeadingJetEM",
+                         "Electromagnetic energy of the leading jet",
+                         "1-d", "E em", "Events",
+                         2000, 0.0, 4000.0,
+                         ValueOf(this->LeadingJetEM), Double(1)));
+
+    if (manager_.isRequested("LeadingJetEMfrac"))
+        manager_.manage(AutoH1D("LeadingJetEMfrac",
+                         "Electromagnetic energy fraction of the leading jet",
+                         "1-d", "f", "Events",
+                         140, -0.2, 1.2,
+                         Apply(first_fraction, this->LeadingJetEM, this->LeadingJetHad),
+                         Double(1)));
+
+    if (manager_.isRequested("FollowingJetEta"))
+        manager_.manage(AutoH1D("FollowingJetEta",
+                         "Eta of the second leading jet",
+                         "1-d", "Eta", "Events",
+                         104, -5.2, 5.2,
+                         ValueOf(this->FollowingJetEta), Double(1)));
+
+    if (manager_.isRequested("FollowingJetPhi"))
+        manager_.manage(AutoH1D("FollowingJetPhi",
+                         "Phi of the second leading jet",
+                         "1-d", "Phi", "Events",
+                         nPhiBins, -M_PI, M_PI,
+                         ValueOf(this->FollowingJetPhi), Double(1)));
+
+    if (manager_.isRequested("FollowingJetPt"))
+        manager_.manage(AutoH1D("FollowingJetPt",
+                         "Pt of the second leading jet",
+                         "1-d", "Pt", "Events",
+                         2000, 0.0, 4000.0,
+                         ValueOf(this->FollowingJetPt), Double(1)));
+
+    if (manager_.isRequested("FollowingJetHad"))
+        manager_.manage(AutoH1D("FollowingJetHad",
+                         "Hadronic energy of the second leading jet",
+                         "1-d", "E had", "Events",
+                         2000, 0.0, 4000.0,
+                         ValueOf(this->FollowingJetHad), Double(1)));
+
+    if (manager_.isRequested("FollowingJetEM"))
+        manager_.manage(AutoH1D("FollowingJetEM",
+                         "Electromagnetic energy of the second leading jet",
+                         "1-d", "E em", "Events",
+                         2000, 0.0, 4000.0,
+                         ValueOf(this->FollowingJetEM), Double(1)));
+
+    if (manager_.isRequested("FollowingJetEMfrac"))
+        manager_.manage(AutoH1D("FollowingJetEMfrac",
+                         "Electromagnetic energy fraction of the second leading jet",
+                         "1-d", "f", "Events",
+                         140, -0.2, 1.2,
+                         Apply(first_fraction, this->FollowingJetEM, this->FollowingJetHad),
+                         Double(1)));
+
+#define book_njets_histo(varname, title) do {                              \
+    if (manager_.isRequested(#varname)) {                                  \
+        manager_.manage(AutoH1D(#varname, title, "1-d", "N Jets", "Events",\
+                         50, -0.5, 49.5,                                   \
+                         ValueOf(this->varname), Double(1)));}             \
+} while(0);
+
+    book_njets_histo(JetCount20, "Number of jets above 20 GeV/c");
+    book_njets_histo(JetCount30, "Number of jets above 30 GeV/c");
+    book_njets_histo(JetCount50, "Number of jets above 50 GeV/c");
+    book_njets_histo(JetCount100, "Number of jets above 100 GeV/c");
+
+    if (manager_.isRequested("OfficialDecision"))
+        manager_.manage(AutoH1D("OfficialDecision",
+                         "The decision of the Hcal baseline noise filter",
+                         "1-d", "Decision", "Events",
+                         2, -0.5, 1.5,
+                         ValueOf(this->OfficialDecision), Double(1)));
+
+    //
+    // Managed histograms in the HBHE group.
+    // These histos will be filled "PulseCount"
+    // times per event.
+    //
+    if (manager_.isRequested("ChargeSum"))
+        manager_.manage(CycledH1D("ChargeSum",
+                           "Total reconstructed charge in all channels",
+                           "HBHE", "Charge Sum", "Channels",
+                           11000, -1000.0, 10000.0,
+                           ElementOf(chargeSums_),
+                           Double(1)), "HBHE");
+
+    if (manager_.isRequested("PedestalSum"))
+        manager_.manage(CycledH1D("PedestalSum",
+                           "Total pedestal in all channels",
+                           "HBHE", "Pedestal Sum", "Channels",
+                           200, 0.0, 100.0,
+                           ElementOf(pedSums_),
+                           Double(1)), "HBHE");
+
+    if (manager_.isRequested("Energy"))
+        manager_.manage(CycledH1D("Energy",
+                           "Reconstructed energy of all channels",
+                           "HBHE", "E", "Channels",
+                           4200, -50.0, 1000.0,
+                           ElementOf(this->Energy),
+                           Double(1)), "HBHE");
+
+    if (manager_.isRequested("IEta"))
+        manager_.manage(CycledH1D("IEta", "IEta of all channels",
+                           "HBHE", "IEta", "Channels",
+                           59, -29.5, 29.5,
+                           ElementOf(this->IEta),
+                           Double(1)), "HBHE");
+
+    if (manager_.isRequested("IPhi"))
+        manager_.manage(CycledH1D("IPhi", "IPhi of all channels",
+                           "HBHE", "IPhi", "Channels",
+                           74, -0.5, 73.5,
+                           ElementOf(this->IPhi),
+                           Double(1)), "HBHE");
+
+    if (manager_.isRequested("Depth"))
+        manager_.manage(CycledH1D("Depth", "Depth of all channels",
+                           "HBHE", "Depth", "Channels",
+                           5, -0.5, 4.5,
+                           ElementOf(this->Depth),
+                           Double(1)), "HBHE");
+
+    if (manager_.isRequested("RecHitTime"))
+        manager_.manage(CycledH1D("RecHitTime",
+                           "Reconstructed hit time of all channels",
+                           "HBHE", "t", "Channels",
+                           320, -60.0, 100.0,
+                           ElementOf(this->RecHitTime),
+                           Double(1)), "HBHE");
+
+    if (manager_.isRequested("ChannelOccupancy"))
+    {
+        manager_.manage(CycledH2D("ChannelOccupancyD1",
+                           "Channel occupancy at depth 1",
+                           "HBHE", "IEta", "IPhi", "Events",
+                           61, -30.5, 30.5,
+                           74, -0.5, 73.5,
+                           ElementOf(this->IEta), ElementOf(this->IPhi),
+                           ElementEQ(this->Depth, 1)), "HBHE");
+
+        manager_.manage(CycledH2D("ChannelOccupancyD2",
+                           "Channel occupancy at depth 2",
+                           "HBHE", "IEta", "IPhi", "Events",
+                           61, -30.5, 30.5,
+                           74, -0.5, 73.5,
+                           ElementOf(this->IEta), ElementOf(this->IPhi),
+                           ElementEQ(this->Depth, 2)), "HBHE");
+
+        manager_.manage(CycledH2D("ChannelOccupancyD3",
+                           "Channel occupancy at depth 3",
+                           "HBHE", "IEta", "IPhi", "Events",
+                           61, -30.5, 30.5,
+                           74, -0.5, 73.5,
+                           ElementOf(this->IEta), ElementOf(this->IPhi),
+                           ElementEQ(this->Depth, 3)), "HBHE");
+
+        manager_.manage(CycledH2D("ChannelOccupancyHPD",
+                           "Channel occupancy organized by HPD number",
+                           "HBHE", "HPD", "Channel", "Events",
+                           HcalHPDRBXMap::NUM_HPDS, -0.5, HcalHPDRBXMap::NUM_HPDS-0.5,
+                           maxChanInHpd, -0.5, maxChanInHpd-0.5,
+                           ElementOf(hpdNumber_), ElementOf(chanInHpdNumber_),
+                           Double(1)), "HBHE");
+    }
+
+    //
+    // Ntuples in the HBHE group. These ntuples
+    // will be filled "PulseCount" times per event.
+    //
+    if (manager_.isRequested("eChanNtuple"))
+        manager_.manage(CycledNtuple("ChannelEnergyNtuple",
+                                     "Channel Energy Ntuple", "HBHE",
+                 std::make_tuple(
+                     Column("ChannelNumber", ElementOf(channelNumber_)),
+                     Column("Energy",        ElementOf(this->Energy))
+                 )), "HBHE");
+
+    if (manager_.isRequested("vtxChanNtuple"))
+        manager_.manage(CycledNtuple("ChannelEnergyDependenceOnNPV",
+                                     "Channel Energy Dependence on NPV Ntuple", "HBHE",
+                 std::make_tuple(
+                     Column("ChannelNumber", ElementOf(channelNumber_)),
+                     Column("Energy",        ElementOf(this->Energy)),
+                     TreeDatum(NumberOfGoodPrimaryVertices)
+                 )), "HBHE");
+
+    if (manager_.isRequested("hbheNtuple"))
+        manager_.manage(CycledNtuple("HBHEChannelNtuple",
+                                     "HBHE Channel Info", "HBHE",
+                 std::make_tuple(
+                     Column("ChannelNumber",    ElementOf(channelNumber_)),
+                     Column("ChargeSum",        ElementOf(chargeSums_)),
+                     Column("PedestalSum",      ElementOf(pedSums_)),
+                     Column("ChargeIntegral",   ElementOf(integSums_)),
+                     Column("PedestalIntegral", ElementOf(integPeds_)),
+                     Column("SignalFraction",   ElementOf(signalFraction_)),
+                     Column("Energy",           ElementOf(this->Energy)),
+                     Column("RecHitTime",       ElementOf(this->RecHitTime))
+                 )), "HBHE");
+
+    //
+    // Managed histograms in the HPD group. Will be filled
+    // HcalHPDRBXMap::NUM_HPDS times per event.
+    //
+    if (manager_.isRequested("HPDOccupancy"))
+        manager_.manage(CycledH2D("HPDOccupancy", "HPD Occupancy Distribution",
+                           "HPD", "HPD", "Channels", "Events",
+                           HcalHPDRBXMap::NUM_HPDS, -0.5, HcalHPDRBXMap::NUM_HPDS-0.5,
+                           55, -0.05,  1.05,
+                           CycleNumber(), ElementOf(hpdOccupancy_), Double(1)), "HPD");
+
+    if (manager_.isRequested("HPDNtuple"))
+        manager_.manage(CycledNtuple("HPDNtuple", "HPD Info Ntuple", "HPD",
+                 std::make_tuple(
+                     Column("HPDNumber",      CycleNumber()),
+                     Column("Occupancy",      ElementOf(hpdOccupancy_)),
+                     Column("NeighborOcc1",   ElementOf(staticNeighborOccupancy_)),
+                     Column("NeighborOcc2",   ElementOf(dynamicNeighborOccupancy_)),
+                     Column("Energy",         ElementOf(hpdEnergy_)),
+                     Column("NeighborE1",     ElementOf(staticNeighborEnergy_)),
+                     Column("NeighborE2",     ElementOf(dynamicNeighborEnergy_)),
+                     Column("SignalLogli1",   Method(&MyType::staticSignalPseudoLogli, this)),
+                     Column("SignalLogli2",   Method(&MyType::dynamicSignalPseudoLogli, this)),
+                     Column("NeighborLogli1", Method(&MyType::staticNeighborPseudoLogli, this)),
+                     Column("NeighborLogli2", Method(&MyType::dynamicNeighborPseudoLogli, this)),
+                     Column("TimeSlice",      Method(&MyType::weightedSignalTimeSlice, this))
+                 )), "HPD");        
+
+    //
+    // Managed histograms in the RBX group (72 entries per event)
+    //
+    if (manager_.isRequested("RBXEnergy"))
+        manager_.manage(CycledH1D("RBXEnergy",
+                           "Total energy of the rechits in all RBXs",
+                           "RBX", "E", "N RBX",
+                           1300, -100.0, 2500.0,
+                           ElementOf(this->RBXEnergy), Double(1)), "RBX");
+
+    if (manager_.isRequested("RBXEnergy15"))
+        manager_.manage(CycledH1D("RBXEnergy15",
+                           "Summed rechits with E > 1.5 GeV in all RBXs",
+                           "RBX", "E", "N RBX",
+                           1300, -100.0, 2500.0,
+                           ElementOf(this->RBXEnergy15), Double(1)), "RBX");
+
+    if (manager_.isRequested("RBXOccupancy"))
+        manager_.manage(CycledH2D("RBXOccupancy", "RBX Occupancy Distribution",
+                           "RBX", "RBX", "Channels", "Events",
+                           HcalHPDRBXMap::NUM_RBXS, -0.5, HcalHPDRBXMap::NUM_RBXS-0.5,
+                           maxChanInRbx+1, -0.5, maxChanInRbx+0.5,
+                           CycleNumber(), ElementOf(rbxOccupancy_), Double(1)), "RBX");
+
+    //
+    // Managed histograms in the RBXT group (720 entries per event)
+    //
+    if (manager_.isRequested("RBXCharge"))
+        manager_.manage(CycledH2D("RBXCharge", "Total RBX mega-pulse shape",
+                           "RBX", "RBX", "Time Slice", "E",
+                           72, -0.5, 71.5,
+                           10, -0.5, 9.5,
+                           UIntRatio(10), UIntRemainder(10),
+                           ElementOf(&this->RBXCharge[0][0])), "RBXT");
+
+    if (manager_.isRequested("RBXCharge15"))
+        manager_.manage(CycledH2D("RBXCharge15", "Total RBX mega-pulse shape "
+                           "with E > 1.5 GeV in a rechit",
+                           "RBX", "RBX", "Time Slice", "E",
+                           72, -0.5, 71.5,
+                           10, -0.5, 9.5,
+                           UIntRatio(10), UIntRemainder(10),
+                           ElementOf(&this->RBXCharge15[0][0])), "RBXT");
+
+    //
+    // An ntuple to store results of various calculations,
+    // one entry per event.
+    //
+    if (manager_.isRequested("EventNtuple"))
+        manager_.manage(AutoNtuple("EventNtuple", "Event Summary Ntuple", "",
+                 std::make_tuple(
+                     Column("EBET_Magnitude", Apply(hypot, this->EBET[0], this->EBET[1])),
+                     Column("EBET_Phi", Apply(atan2, this->EBET[1], this->EBET[0])),
+                     Column("EEET_Magnitude", Apply(hypot, this->EEET[0], this->EEET[1])),
+                     Column("EEET_Phi", Apply(atan2, this->EEET[1], this->EEET[0])),
+                     Column("HBET_Magnitude", Apply(hypot, this->HBET[0], this->HBET[1])),
+                     Column("HBET_Phi", Apply(atan2, this->HBET[1], this->HBET[0])),
+                     Column("HEET_Magnitude", Apply(hypot, this->HEET[0], this->HEET[1])),
+                     Column("HEET_Phi", Apply(atan2, this->HEET[1], this->HEET[0])),
+                     Column("HFET_Magnitude", Apply(hypot, this->HFET[0], this->HFET[1])),
+                     Column("HFET_Phi", Apply(atan2, this->HFET[1], this->HFET[0])),
+                     Column("MET_Magnitude",  Apply(hypot, this->NominalMET[0], this->NominalMET[1])),
+                     Column("MET_Phi",  Apply(atan2, this->NominalMET[1], this->NominalMET[0])),
+                     TreeDatum(EBSumE),
+                     TreeDatum(EESumE),
+                     TreeDatum(HBSumE),
+                     TreeDatum(HESumE),
+                     TreeDatum(HFSumE),
+                     TreeDatum(EBSumET),
+                     TreeDatum(EESumET),
+                     TreeDatum(HBSumET),
+                     TreeDatum(HESumET),
+                     TreeDatum(HFSumET),
+                     TreeDatum(NumberOfGoodTracks),
+                     TreeDatum(NumberOfGoodTracks15),
+                     TreeDatum(NumberOfGoodTracks30),
+                     Column("TotalPTTracks_Magnitude", Apply(hypot, this->TotalPTTracks[0],
+                                                             this->TotalPTTracks[1])),
+                     Column("TotalPTTracks_Phi", Apply(atan2, this->TotalPTTracks[1],
+                                                       this->TotalPTTracks[0])),
+                     TreeDatum(SumPTTracks),
+                     TreeDatum(SumPTracks),
+                     TreeDatum(NumberOfGoodPrimaryVertices),
+                     TreeDatum(NumberOfMuonCandidates),
+                     TreeDatum(NumberOfCosmicMuonCandidates),
+                     TreeDatum(PulseCount),
+                     TreeDatum(HPDHits),
+                     TreeDatum(HPDNoOtherHits),
+                     TreeDatum(MaxZeros),
+                     TreeDatum(MinE2E10),
+                     TreeDatum(MaxE2E10),
+                     TreeDatum(LeadingJetEta),
+                     TreeDatum(LeadingJetPhi),
+                     TreeDatum(LeadingJetPt),
+                     TreeDatum(LeadingJetHad),
+                     TreeDatum(LeadingJetEM),
+                     TreeDatum(FollowingJetEta),
+                     TreeDatum(FollowingJetPhi),
+                     TreeDatum(FollowingJetPt),
+                     TreeDatum(FollowingJetHad),
+                     TreeDatum(FollowingJetEM),
+                     TreeDatum(JetCount20),
+                     TreeDatum(JetCount30),
+                     TreeDatum(JetCount50),
+                     TreeDatum(JetCount100),
+                     TreeDatum(OfficialDecision)
+                 )));
+}
+
+
+template <class Options, class RootMadeClass>
+void NoiseTreeAnalysis<Options,RootMadeClass>::fillManagedHistograms()
+{
+    // Don't forget to call the "AutoFill" and, possibly, "CycleFill"
+    // methods of the manager. Managed histograms and ntuples will be
+    // filled there.
+    manager_.AutoFill();
+
+    manager_.CycleFill(this->PulseCount, "HBHE", false);
+    manager_.CycleFill(HcalHPDRBXMap::NUM_HPDS, "HPD", false);
+    manager_.CycleFill(HcalHPDRBXMap::NUM_RBXS, "RBX", false);
+    manager_.CycleFill(HcalHPDRBXMap::NUM_RBXS*nTimeSlices, "RBXT", false);
+}

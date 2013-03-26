@@ -1,0 +1,119 @@
+This is a simple analysis framework to run over root trees using
+compiled programs. It has a number of advantages over using CINT
+scripts:
+
+-- Complete and compliant use of the C++ compiler
+
+-- Ability to link external libraries easily
+
+-- Powerful command line parsing facility
+
+-- "Managed" histogram and ntuple classes (built on top of root classes,
+   so the objects saved to disk are still the original root objects).
+   These histograms and ntuples know how to fill and destroy themselves,
+   so the users just have to create them. This significantly improves the
+   user code locality and eliminates a number of potential bugs.
+
+The framework makes it very easy to swap/replace/update the three main
+changeable pieces: the root tree branch setup code, the command line
+parsing code, and the tree analysis code. Encapsulation of these
+functionalities in separate classes encourages code reuse.
+
+
+To use the framework, proceed as follows:
+
+1. Generate the root tree branch setup code with the tree "MakeClass" method.
+   Example of how to to this in root can be found in file "making_a_class.C".
+
+2. Your analysis code will consist of two classes, one for parsing command
+   line options and the other for cycling over the tree and building
+   histograms, ntuples of results, etc. These two classes work in tandem.
+   Examples of these classes are:
+
+   ExampleAnalysisOptions.h -- for the command line option parsing
+
+   ExampleAnalysis.h, ExampleAnalysis.icc -- for cycling over the tree
+
+   You can quickly generate a skeleton for your analysis as follows
+   (substitute any name instead of "MyAnalysis" and change variable
+    assignment statement if you are using bash instead of csh):
+
+   set anaName = MyAnalysis
+
+   sed "s/ExampleAnalysisOptions/${anaName}Options/g" ExampleAnalysisOptions.h > ${anaName}Options.h
+   sed "s/ExampleAnalysis/$anaName/g" ExampleAnalysis.h > ${anaName}.h
+   sed "s/ExampleAnalysis/$anaName/g" ExampleAnalysis.icc > ${anaName}.icc
+
+3. Create the analysis definition file. Use "exampleTreeAnalysis.ana" as
+   a prototype. Your file must have extension .ana but in reality this is
+   just a normal C++ header (and will be included as such). The purpose of
+   this header is to make "AnalysisClass" typedef which will be later used
+   to build the analysis executable. The following might help you to create
+   a preliminary version called "myProgram.ana" (rename as needed):
+
+   sed "s/ExampleAnalysis/$anaName/g" exampleTreeAnalysis.ana > myProgram.ana
+
+4. Edit the Makefile. Add your ".ana" file to the "PROGRAMS" variable and
+   the object file for the tree class generated in step 1 to the "OFILES"
+   variable (in case it is not already there).
+
+5. Type "make". The executable for your analysis (with the same name
+   as your .ana file but without extension) will be compiled. The C++
+   code for your main program will be auto-generated using the definitions
+   provided in your .ana file.
+
+To print usage instructions, run your program without any arguments.
+In addition to the options defined by your command line parsing class,
+the program will have five additional options: -h, -n, -s, -t, and -v.
+The meaning of these options is as follows:
+
+-h histoTags  This option provides a comma-separated set of histograms
+              to create. This set will be passed as one of the arguments
+              to your analysis class. The best use of this set is to pass
+              it on as an argument to the HistogramManager instance, as
+              it is done in the implementation of ExampleAnalysis, and
+              then call "isRequested" method of HistogramManager to create
+              histograms and ntuples conditionally. You will then be able
+              to request which histograms to create from the command line.
+              For example, you can run the example executable as follows:
+
+              exampleTreeAnalysis -h HBETMagnitude,ResultNtuple output.root \
+                  input.root
+
+              This will execute the histogram creation code for requests
+              "HBETMagnitude" and "ResultNtuple" checked by "isRequested".
+              Here are a few additional examples:
+
+              exampleTreeAnalysis -h NoSuchHistogram output.root input.root
+
+              The program will stop after the histogram creation stage
+              because it doesn't know how to create "NoSuchHistogram".
+
+              exampleTreeAnalysis -h '.*' output.root input.root
+
+              The program will create all possible histograms because '.*'
+              will be treated as a C++ standard regular expression and will
+              match any histogram name. See the comments to the HistogramManager
+              constructor (in file HistogramManager.h) for more details on
+              regular expressions use.
+
+              exampleTreeAnalysis -h '.*HPDHits.*' output.root input.root
+
+              The program will create all histograms with substring "HPDHits"
+              present in the arguments of "isRequested" checks.
+
+-n numEvents  This option specifies the maximum number of events to
+              process (counted after passing the selection cut). Default is
+              to process all events.
+
+-s            If specified, the printout of the statistics about the
+              number of events processed will be suppressed.
+
+-t treeName   The name of the tree in the root input files (including
+              directory). Default is "ExportTree/HcalNoiseTree".
+
+-v            If specified, the "verbose" argument of your analysis class
+              constructor will be set "true", otherwise it will be "false".
+
+I. Volobouev
+March 2013
