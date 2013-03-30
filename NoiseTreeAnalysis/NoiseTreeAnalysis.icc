@@ -89,26 +89,6 @@ void NoiseTreeAnalysis<Options,RootMadeClass>::loadOccupancyConverters()
 
 
 template <class Options, class RootMadeClass>
-double NoiseTreeAnalysis<Options,RootMadeClass>::weightedSignalTimeSlice(
-    const unsigned hpd) const
-{
-    const std::vector<unsigned>& channels(hpdChannelsReadOut_[hpd]);
-    const unsigned nChannels = channels.size();
-    double wsum = 0.0, tsum = 0.0;
-    for (unsigned i=0; i<nChannels; ++i)
-    {
-        const int pulse = pulseNumber_[channels[i]];
-        wsum += filterSums_[pulse];
-        tsum += filterSums_[pulse] * startingSlice_[pulse];
-    }
-    if (wsum > 0.0)
-        return tsum/wsum;
-    else
-        return -1.0;
-}
-
-
-template <class Options, class RootMadeClass>
 int NoiseTreeAnalysis<Options,RootMadeClass>::beginJob()
 {
     if (verbose_)
@@ -169,7 +149,6 @@ template <class Options, class RootMadeClass>
 int NoiseTreeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
 {
     // Initialize various maps and arrays
-    memset(hpdEnergy_, 0, sizeof(hpdEnergy_));
     memset(rbxOccupancy_, 0, sizeof(rbxOccupancy_));
 
     for (unsigned i=0; i<HBHEChannelMap::ChannelCount; ++i)
@@ -187,13 +166,14 @@ int NoiseTreeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
     // Cycle over channel data
     for (Int_t i=0; i<this->PulseCount; ++i)
     {
-        // Determine an remember the channel number for the given "pulse"
+        // Determine and remember the channel number for the given "pulse"
         const unsigned chNum = channelMap_.linearIndex(
             this->Depth[i], this->IEta[i], this->IPhi[i]);
         channelNumber_[i] = chNum;
 
         // Mapping from channel numbers to pulse numbers.
-        // Pulse numbers are initialized to -1 (invalid)
+        // Note that pulse numbers are initialized to -1
+        // (means that channel is not read out in this event).
         pulseNumber_[chNum] = i;
 
         // Get the HPD number from the channel number
@@ -203,7 +183,6 @@ int NoiseTreeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
         hpdNumber_[i] = hpdNum;
         chanInHpdNumber_[i] = channelMap_.getChannelInHPD(chNum);
         hpdChannelsReadOut_[hpdNum].push_back(chNum);
-        hpdEnergy_[hpdNum] += this->Energy[i];
 
         // Get the RBX number from the channel number
         const unsigned rbxNum = channelMap_.getRBX(chNum);
@@ -238,63 +217,30 @@ int NoiseTreeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
                                          charge+maxSlice, 0.0);
     }
 
-    // Determine occupancies and sum energis over the channels
-    // belonging to each HPD and over channels neighboring each HPD
-    for (int hpd=0; hpd<HcalHPDRBXMap::NUM_HPDS; ++hpd)
-    {
-        // Fractional occupancy for the given HPD
-        const unsigned nReadSignal = hpdChannelsReadOut_[hpd].size();
-        const unsigned nChanInHPD = channelMap_.getHPDChannels(hpd).size();
-        hpdOccupancy_[hpd] = nReadSignal*1.0/nChanInHPD;
-
-        // Occupancy and energy for "static neighbors", i.e., channels
-        // bordering any of the channels in the given HPD, read out or not
-        unsigned nRead = 0;
-        double Esum = 0.0;
-        const std::vector<unsigned>& staticNeighbors = 
-            channelMap_.getHPDNeigbors(hpd);
-        const unsigned nStaticNeighbors = staticNeighbors.size();
-        for (unsigned i=0; i<nStaticNeighbors; ++i)
-        {
-            const int iPulse = pulseNumber_[staticNeighbors[i]];
-            if (iPulse >= 0)
-            {
-                Esum += this->Energy[iPulse];
-                ++nRead;
-            }
-        }
-        staticNeighborOccupancy_[hpd] = nRead*1.0/nStaticNeighbors;
-        staticNeighborEnergy_[hpd] = Esum;
-
-        // Occupancy for "dynamic neighbors", i.e., channels bordering
-        // any of the channels read out in the given HPD
-        Esum = 0.0;
-        channelMap_.channelSetNeighbors(
-            hpdChannelsReadOut_[hpd], &hpdNeighbors_[hpd]);
-        const std::vector<unsigned>& dynamicNeighbors(hpdNeighbors_[hpd]);
-        const unsigned nDynamicNeighbors = dynamicNeighbors.size();
-        if (nDynamicNeighbors)
-        {
-            nRead = 0;
-            for (unsigned i=0; i<nDynamicNeighbors; ++i)
-            {
-                const int iPulse = pulseNumber_[dynamicNeighbors[i]];
-                if (iPulse >= 0)
-                {
-                    Esum += this->Energy[iPulse];
-                    ++nRead;
-                }
-            }
-            dynamicNeighborOccupancy_[hpd] = nRead*1.0/nDynamicNeighbors;
-        }
-        else
-            dynamicNeighborOccupancy_[hpd] = 0.0;
-        dynamicNeighborEnergy_[hpd] = Esum;
-    }
-
     // Normalize RBX occupancy to 1
     for (int i=0; i<HcalHPDRBXMap::NUM_RBXS; ++i)
         rbxOccupancy_[i] /= channelMap_.getRBXChannels(i).size();
+
+    // Figure out HPD-related quantities
+    for (int hpd=0; hpd<HcalHPDRBXMap::NUM_HPDS; ++hpd)
+    {
+        hpdInfo_[hpd].fill(hpdChannelsReadOut_[hpd],
+                           *this, filter,
+                           options_.minTSlice, options_.maxTSlice,
+                           pulseNumber_, startingSlice_, filterSums_);
+
+        staticNeighborInfo_[hpd].fill(channelMap_.getHPDNeigbors(hpd),
+                                      *this, filter,
+                                      options_.minTSlice, options_.maxTSlice,
+                                      pulseNumber_, startingSlice_, filterSums_);
+
+        channelMap_.channelSetNeighbors(hpdChannelsReadOut_[hpd],
+                                        &hpdNeighbors_[hpd]);
+        dynamicNeighborInfo_[hpd].fill(hpdNeighbors_[hpd],
+                                       *this, filter,
+                                       options_.minTSlice, options_.maxTSlice,
+                                       pulseNumber_, startingSlice_, filterSums_);
+    }
 
     fillManagedHistograms();
     return 0;
@@ -750,25 +696,88 @@ void NoiseTreeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
         manager_.manage(CycledH2D("HPDOccupancy", "HPD Occupancy Distribution",
                            "HPD", "HPD", "Channels", "Events",
                            HcalHPDRBXMap::NUM_HPDS, -0.5, HcalHPDRBXMap::NUM_HPDS-0.5,
-                           55, -0.05,  1.05,
-                           CycleNumber(), ElementOf(hpdOccupancy_), Double(1)), "HPD");
+                           55, -0.05,  1.05, CycleNumber(),
+                           ElementMethod(&ChannelGroupInfo::occupancy, hpdInfo_),
+                           Double(1)), "HPD");
+
+    if (manager_.isRequested("HPDTStart"))
+        manager_.manage(CycledH2D("HPDTStart", "HPD Signal Start Time Slice Distribution",
+                           "HPD", "HPD", "Slice", "Events",
+                           HcalHPDRBXMap::NUM_HPDS, -0.5, HcalHPDRBXMap::NUM_HPDS-0.5,
+                           11, -1.5, 9.5, CycleNumber(),
+                           ElementMember(hpdInfo_, &hpdInfo_->startTSlice),
+                           Double(1)), "HPD");
+
+    if (manager_.isRequested("WeightedHPDTStart"))
+        manager_.manage(CycledH2D("WeightedHPDTStart",
+                           "HPD Signal Weighted Start Time Slice Distribution",
+                           "HPD", "HPD", "Slice", "Events",
+                           HcalHPDRBXMap::NUM_HPDS, -0.5, HcalHPDRBXMap::NUM_HPDS-0.5,
+                           110, -1.5, 9.5, CycleNumber(),
+                           ElementMember(hpdInfo_, &hpdInfo_->weightedStartTSlice),
+                           Double(1)), "HPD");
+
+    if (manager_.isRequested("HPDChargeFraction"))
+        manager_.manage(CycledH2D("HPDChargeFraction",
+                           "Charge Fraction in the Standard Window",
+                           "HPD", "HPD", "Fraction", "Events",
+                           HcalHPDRBXMap::NUM_HPDS, -0.5, HcalHPDRBXMap::NUM_HPDS-0.5,
+                           120, -0.1, 1.1, CycleNumber(),
+                           ElementMethod(&ChannelGroupInfo::integratedChargeFraction, hpdInfo_),
+                           Double(1)), "HPD");
+
+    if (manager_.isRequested("HPDFilterFraction"))
+        manager_.manage(CycledH2D("HPDFilterFraction",
+                           "Charge Fraction in the Filter Window",
+                           "HPD", "HPD", "Fraction", "Events",
+                           HcalHPDRBXMap::NUM_HPDS, -0.5, HcalHPDRBXMap::NUM_HPDS-0.5,
+                           120, -0.1, 1.1, CycleNumber(),
+                           ElementMethod(&ChannelGroupInfo::filteredChargeFraction, hpdInfo_),
+                           Double(1)), "HPD");
 
     if (manager_.isRequested("HPDNtuple"))
         manager_.manage(CycledNtuple("HPDNtuple", "HPD Info Ntuple", "HPD",
                  std::make_tuple(
-                     Column("HPDNumber",      CycleNumber()),
-                     Column("Occupancy",      ElementOf(hpdOccupancy_)),
-                     Column("NeighborOcc1",   ElementOf(staticNeighborOccupancy_)),
-                     Column("NeighborOcc2",   ElementOf(dynamicNeighborOccupancy_)),
-                     Column("Energy",         ElementOf(hpdEnergy_)),
-                     Column("NeighborE1",     ElementOf(staticNeighborEnergy_)),
-                     Column("NeighborE2",     ElementOf(dynamicNeighborEnergy_)),
-                     Column("SignalLogli1",   Method(&MyType::staticSignalPseudoLogli, this)),
-                     Column("SignalLogli2",   Method(&MyType::dynamicSignalPseudoLogli, this)),
-                     Column("NeighborLogli1", Method(&MyType::staticNeighborPseudoLogli, this)),
-                     Column("NeighborLogli2", Method(&MyType::dynamicNeighborPseudoLogli, this)),
-                     Column("TimeSlice",      Method(&MyType::weightedSignalTimeSlice, this))
-                 )), "HPD");        
+                     Column("HPDNumber",       CycleNumber()),
+                     Column("Occupancy",       ElementMethod(&ChannelGroupInfo::occupancy,
+                                                             hpdInfo_)),
+                     Column("NeighborOcc1",    ElementMethod(&ChannelGroupInfo::occupancy,
+                                                             staticNeighborInfo_)),
+                     Column("NeighborOcc2",    ElementMethod(&ChannelGroupInfo::occupancy,
+                                                             dynamicNeighborInfo_)),
+                     Column("Energy",          ElementMember(hpdInfo_, &hpdInfo_->energySum)),
+                     Column("NeighborE1",      ElementMember(staticNeighborInfo_,
+                                                             &staticNeighborInfo_->energySum)),
+                     Column("NeighborE2",      ElementMember(dynamicNeighborInfo_,
+                                                             &dynamicNeighborInfo_->energySum)),
+                     Column("SignalLogli1",    Method(&MyType::staticSignalPseudoLogli, this)),
+                     Column("SignalLogli2",    Method(&MyType::dynamicSignalPseudoLogli, this)),
+                     Column("NeighborLogli1",  Method(&MyType::staticNeighborPseudoLogli, this)),
+                     Column("NeighborLogli2",  Method(&MyType::dynamicNeighborPseudoLogli, this)),
+                     Column("TStart",          ElementMember(hpdInfo_, &hpdInfo_->startTSlice)),
+                     Column("WTStart",         ElementMember(hpdInfo_, &hpdInfo_->weightedStartTSlice)),
+                     Column("NeighborTStart1",  ElementMember(staticNeighborInfo_,
+                                                              &staticNeighborInfo_->startTSlice)),
+                     Column("NeighborWTStart1", ElementMember(staticNeighborInfo_,
+                                                              &staticNeighborInfo_->weightedStartTSlice)),
+                     Column("NeighborTStart2",  ElementMember(dynamicNeighborInfo_,
+                                                              &dynamicNeighborInfo_->startTSlice)),
+                     Column("NeighborWTStart2", ElementMember(dynamicNeighborInfo_,
+                                                              &dynamicNeighborInfo_->weightedStartTSlice)),
+                     Column("IntegCFrac",      ElementMethod(&ChannelGroupInfo::integratedChargeFraction,
+                                                             hpdInfo_)),
+                     Column("FilterCFrac",     ElementMethod(&ChannelGroupInfo::filteredChargeFraction,
+                                                             hpdInfo_)),
+                     Column("NeighborICFrac1", ElementMethod(&ChannelGroupInfo::integratedChargeFraction,
+                                                             staticNeighborInfo_)),
+                     Column("NeighborFCFrac1", ElementMethod(&ChannelGroupInfo::filteredChargeFraction,
+                                                             staticNeighborInfo_)),
+                     Column("NeighborICFrac2", ElementMethod(&ChannelGroupInfo::integratedChargeFraction,
+                                                             dynamicNeighborInfo_)),
+                     Column("NeighborFCFrac2", ElementMethod(&ChannelGroupInfo::filteredChargeFraction,
+                                                             dynamicNeighborInfo_)),
+                     TreeDatum(NumberOfGoodPrimaryVertices)
+                 )), "HPD");
 
     //
     // Managed histograms in the RBX group (72 entries per event)

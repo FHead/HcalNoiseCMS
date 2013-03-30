@@ -23,6 +23,7 @@
 
 #include <cassert>
 
+
 class Double
 {
 public:
@@ -76,7 +77,9 @@ class UIntRatio
 {
 public:
     inline UIntRatio(const unsigned divisor) : divisor_(divisor) {}
-    inline unsigned operator()(const unsigned n) const {return n/divisor_;}
+
+    inline unsigned operator()(const unsigned n) const
+        {return n/divisor_;}
 
 private:
     unsigned divisor_;
@@ -88,7 +91,9 @@ class UIntRemainder
 {
 public:
     inline UIntRemainder(const unsigned divisor) : divisor_(divisor) {}
-    inline unsigned operator()(const unsigned n) const {return n%divisor_;}
+
+    inline unsigned operator()(const unsigned n) const
+        {return n%divisor_;}
 
 private:
     unsigned divisor_;
@@ -365,6 +370,96 @@ inline ElementGEHlp<T> ElementGE(T* t, const T& value, unsigned stride=1)
 
 //======================================================================
 
+template<typename Result, typename T>
+class ElementMemberFcnHlp0
+{
+public:
+    typedef Result (T::*MemFunc)();
+
+    inline ElementMemberFcnHlp0(MemFunc f, T* obj, const unsigned stride)
+        : f_(f), ptr_(obj), stride_(stride) {assert(ptr_);}
+
+    inline Result operator()(const unsigned i) const
+        {return ((ptr_ + i*stride_)->*f_)();}
+
+private:
+    MemFunc f_;
+    T* ptr_;
+    unsigned stride_;
+};
+
+template<typename Result, typename T>
+inline ElementMemberFcnHlp0<Result,T> ElementMethod(
+    Result (T::*f)(), T* ptr, unsigned stride=1)
+{
+    return ElementMemberFcnHlp0<Result,T>(f, ptr, stride);
+}
+
+//======================================================================
+
+template<typename Result, typename T>
+class ElementMemberFcnHlp0Const
+{
+public:
+    typedef Result (T::*MemFunc)() const;
+
+    inline ElementMemberFcnHlp0Const(MemFunc f, const T* obj,
+                                     const unsigned stride)
+        : f_(f), ptr_(obj), stride_(stride) {assert(ptr_);}
+
+    inline Result operator()(const unsigned i) const
+        {return ((ptr_ + i*stride_)->*f_)();}
+
+private:
+    MemFunc f_;
+    const T* ptr_;
+    unsigned stride_;
+};
+
+template<typename Result, typename T>
+inline ElementMemberFcnHlp0Const<Result,T> ElementMethod(
+    Result (T::*f)() const, const T* ptr, unsigned stride=1)
+{
+    return ElementMemberFcnHlp0Const<Result,T>(f, ptr, stride);
+}
+
+//======================================================================
+
+template<typename Result, typename T>
+class ElementMemberHlp
+{
+public:
+    inline ElementMemberHlp(const T* arr, const unsigned long offset,
+                            const unsigned stride)
+        : ptr_(arr), offset_(offset), stride_(stride) {}
+
+    inline Result operator()(const unsigned i) const
+    {
+        return *(reinterpret_cast<const Result*>(
+                 reinterpret_cast<const char*>(ptr_+i*stride_)+offset_));
+    }
+
+private:
+    const T* ptr_;
+    unsigned long offset_;
+    unsigned stride_;
+};
+
+
+template<typename Result, typename T>
+inline ElementMemberHlp<Result,T> ElementMember(
+    const T* base, const Result* element, unsigned stride=1)
+{
+    assert(base);
+    assert(element);
+    long off = reinterpret_cast<const char*>(element) - 
+               reinterpret_cast<const char*>(base);
+    assert(off >= 0L);
+    return ElementMemberHlp<Result,T>(base, off, stride);
+}
+
+//======================================================================
+
 template<typename T>
 class CMathFcnHlp
 {
@@ -453,7 +548,8 @@ private:
 };
 
 template<typename Result, typename T>
-inline MemberFcnHlp0Const<Result,T> Method(Result (T::*f)() const, const T* ptr)
+inline MemberFcnHlp0Const<Result,T> Method(Result (T::*f)() const,
+                                           const T* ptr)
 {
     return MemberFcnHlp0Const<Result,T>(f, ptr);
 }

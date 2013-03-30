@@ -4,6 +4,7 @@
 #include "RootChainProcessor.h"
 #include "HistogramManager.h"
 #include "HBHEChannelMap.h"
+#include "ChannelGroupInfo.h"
 
 #include "npstat/stat/LeftCensoredDistribution.hh"
 
@@ -89,24 +90,25 @@ private:
     // (up to this->PulseCount)
     double filterSums_[HBHEChannelMap::ChannelCount];
 
-    // Channel occupancy per HPD
-    double hpdOccupancy_[HcalHPDRBXMap::NUM_HPDS];
-    double staticNeighborOccupancy_[HcalHPDRBXMap::NUM_HPDS];
-    double dynamicNeighborOccupancy_[HcalHPDRBXMap::NUM_HPDS];
+    // Summary info for channels grouped by HPDs
+    ChannelGroupInfo hpdInfo_[HcalHPDRBXMap::NUM_HPDS];
 
-    // Summed energy per HPD
-    double hpdEnergy_[HcalHPDRBXMap::NUM_HPDS];
-    double staticNeighborEnergy_[HcalHPDRBXMap::NUM_HPDS];
-    double dynamicNeighborEnergy_[HcalHPDRBXMap::NUM_HPDS];
+    // Summary info for "static" HPD neighbor channels
+    // (neighbors of all HPD channels, both read out and not)
+    ChannelGroupInfo staticNeighborInfo_[HcalHPDRBXMap::NUM_HPDS];
 
-    // Channel occupancy per RBX
-    double rbxOccupancy_[HcalHPDRBXMap::NUM_RBXS];
+    // Summary info for "dynamic" HPD neighbor channels
+    // (neighbors of those HPD channels that have been read out)
+    ChannelGroupInfo dynamicNeighborInfo_[HcalHPDRBXMap::NUM_HPDS];
 
     // Channel numbers read out for each HPD in this event
     std::vector<unsigned> hpdChannelsReadOut_[HcalHPDRBXMap::NUM_HPDS];
 
-    // Neighbor channels for each HPD in this event
+    // "Dynamic" neighbor channels for each HPD in this event
     std::vector<unsigned> hpdNeighbors_[HcalHPDRBXMap::NUM_HPDS];
+
+    // Channel occupancy per RBX
+    double rbxOccupancy_[HcalHPDRBXMap::NUM_RBXS];
 
     // Table of distributions which convert energy values seen
     // into occupancy above that energy and back
@@ -128,8 +130,6 @@ private:
 
     double dynamicNeighborPseudoLogli(const unsigned hpd) const
         {return calculatePseudoLogLikelihood(hpdNeighbors_[hpd]);}
-
-    double weightedSignalTimeSlice(unsigned hpd) const;
 };
 
 #include "NoiseTreeAnalysis.icc"

@@ -166,6 +166,10 @@ edm::Exception.
 analyzeEChanNtuple.C -- Helper executable for building energy distributions
                         out of observed samples.
 
+ChannelGroupInfo.h   -- Summary info for a group of channels. Used to
+                        study channels grouped by HPD as well as those
+                        channels neighboring an HPD.
+
 DetId.h              -- The CMS detector id. Lifted from CMSSW code
                         DataFormats/DetId/interface/DetId.h.
 
