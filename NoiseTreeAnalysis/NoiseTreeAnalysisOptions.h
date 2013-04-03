@@ -41,7 +41,9 @@
 struct NoiseTreeAnalysisOptions
 {
     NoiseTreeAnalysisOptions()
-        : maxLogContribution(10.0),
+        : hbGeometryFile("Geometry/hb.ctr"),
+          heGeometryFile("Geometry/he.ctr"),
+          maxLogContribution(10.0),
           nPhiBins(144),
           minTSlice(4),
           maxTSlice(6)
@@ -51,6 +53,8 @@ struct NoiseTreeAnalysisOptions
     void parse(CmdLine& cmdline)
     {
         cmdline.option(NULL, "--converters") >> convertersGSSAFile;
+        cmdline.option(NULL, "--hbgeo") >> hbGeometryFile;
+        cmdline.option(NULL, "--hegeo") >> heGeometryFile;
         cmdline.option(NULL, "--maxLogContribution") >> maxLogContribution;
         cmdline.option(NULL, "--nPhiBins") >> nPhiBins;
         cmdline.option(NULL, "--minTSlice") >> minTSlice;
@@ -66,6 +70,8 @@ struct NoiseTreeAnalysisOptions
     void usage(std::ostream& os) const
     {
         os << "[--converters converterFile]"
+           << " [--hbgeo filename]"
+           << " [--hegeo filename]"
            << " [--maxLogContribution value]"
            << " [--nPhiBins nBins]"
            << " [--minTSlice tSlice]"
@@ -74,7 +80,11 @@ struct NoiseTreeAnalysisOptions
     }
 
     std::string convertersGSSAFile;
+    std::string hbGeometryFile;
+    std::string heGeometryFile;
+
     double maxLogContribution;
+
     unsigned nPhiBins;
     unsigned minTSlice;
     unsigned maxTSlice;
@@ -83,6 +93,8 @@ struct NoiseTreeAnalysisOptions
 std::ostream& operator<<(std::ostream& os, const NoiseTreeAnalysisOptions& o)
 {
     os << "converters = \"" << o.convertersGSSAFile << '"'
+       << ", hbgeo = \"" << o.hbGeometryFile << '"'
+       << ", hegeo = \"" << o.heGeometryFile << '"'
        << ", maxLogContribution = " << o.maxLogContribution
        << ", nPhiBins = " << o.nPhiBins
        << ", minTSlice = " << o.minTSlice

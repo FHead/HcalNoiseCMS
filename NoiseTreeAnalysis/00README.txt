@@ -24,7 +24,7 @@ becomes difficult to read as the number of histograms grows. Such
 a code is also more difficult to debug if something is not working as
 expected. This problem is exacerbated if the histograms are created
 and filled conditionally, depending on the values of some boolean
-switches. So, one of the purposes of the the root tree processing
+switches. So, one of the purposes of the root tree processing
 framework implemented here is to eliminate this inconvenience. The
 framework provides wrappers in which the histogram creation parameters
 are specified together with the mechanisms by which the histograms are
@@ -180,6 +180,10 @@ HBHEChannelMap.C        that belong the same HPD and/or for navigating
                         collections of HPD neighbor channels (neighbors
                         are found by changing ieta or iphi by one and checking
                         that they do not belong to the same HPD).
+
+HBHEChannelGeometry.h -- Geometrical information for HB and HE channels.
+HBHEChannelGeometry.C    This is, basically, a lookup table of channel
+                         physical directions by channel number.
 
 HcalDetId.h          -- Numerology for naming HCAL channels. Used internally
 HcalDetId.C             by HBHEChannelMap and HcalHPDRBXMap. Lifted from

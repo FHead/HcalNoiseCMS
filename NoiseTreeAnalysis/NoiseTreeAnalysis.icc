@@ -36,6 +36,22 @@ namespace {
 
 
 template <class Options, class RootMadeClass>
+NoiseTreeAnalysis<Options,RootMadeClass>::NoiseTreeAnalysis(
+    TTree *tree, const std::string& outputfile,
+    const std::set<std::string>& histoRequest,
+    const unsigned long maxEvents, const bool verbose,
+    const Options& opt)
+    : RootChainProcessor<RootMadeClass>(tree, maxEvents),
+      options_(opt),
+      verbose_(verbose),
+      manager_(outputfile, histoRequest),
+      channelGeometry_(options_.hbGeometryFile.c_str(),
+                       options_.heGeometryFile.c_str())
+{
+}
+
+
+template <class Options, class RootMadeClass>
 Int_t NoiseTreeAnalysis<Options,RootMadeClass>::Cut(Long64_t /* entry */)
 {
     // return  1 if entry is accepted.
@@ -224,19 +240,22 @@ int NoiseTreeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
     // Figure out HPD-related quantities
     for (int hpd=0; hpd<HcalHPDRBXMap::NUM_HPDS; ++hpd)
     {
-        hpdInfo_[hpd].fill(hpdChannelsReadOut_[hpd],
+        hpdInfo_[hpd].fill(channelGeometry_,
+                           hpdChannelsReadOut_[hpd],
                            *this, filter,
                            options_.minTSlice, options_.maxTSlice,
                            pulseNumber_, startingSlice_, filterSums_);
 
-        staticNeighborInfo_[hpd].fill(channelMap_.getHPDNeigbors(hpd),
+        staticNeighborInfo_[hpd].fill(channelGeometry_,
+                                      channelMap_.getHPDNeigbors(hpd),
                                       *this, filter,
                                       options_.minTSlice, options_.maxTSlice,
                                       pulseNumber_, startingSlice_, filterSums_);
 
         channelMap_.channelSetNeighbors(hpdChannelsReadOut_[hpd],
                                         &hpdNeighbors_[hpd]);
-        dynamicNeighborInfo_[hpd].fill(hpdNeighbors_[hpd],
+        dynamicNeighborInfo_[hpd].fill(channelGeometry_,
+                                       hpdNeighbors_[hpd],
                                        *this, filter,
                                        options_.minTSlice, options_.maxTSlice,
                                        pulseNumber_, startingSlice_, filterSums_);

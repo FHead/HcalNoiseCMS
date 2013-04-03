@@ -1,5 +1,5 @@
 OFILES = HistogramManager.o NoiseTreeData.o HBHEChannelMap.o HcalDetId.o \
-         HcalHPDRBXMap.o
+         HcalHPDRBXMap.o HBHEChannelGeometry.o
 
 PROGRAMS = exampleTreeAnalysis.ana runNoiseTreeAnalysis.ana
 

@@ -4,6 +4,7 @@
 #include "RootChainProcessor.h"
 #include "HistogramManager.h"
 #include "HBHEChannelMap.h"
+#include "HBHEChannelGeometry.h"
 #include "ChannelGroupInfo.h"
 
 #include "npstat/stat/LeftCensoredDistribution.hh"
@@ -19,16 +20,10 @@ public:
     typedef Options options_type;
     typedef NoiseTreeAnalysis<Options, RootMadeClass> MyType;
 
-    inline NoiseTreeAnalysis(TTree *tree, const std::string& outputfile,
-                             const std::set<std::string>& histoRequest,
-                             const unsigned long maxEvents, const bool verbose,
-                             const Options& opt)
-        : RootChainProcessor<RootMadeClass>(tree, maxEvents),
-          options_(opt),
-          verbose_(verbose),
-          manager_(outputfile, histoRequest)
-    {
-    }
+    NoiseTreeAnalysis(TTree *tree, const std::string& outputfile,
+                      const std::set<std::string>& histoRequest,
+                      unsigned long maxEvents, bool verbose,
+                      const Options& opt);
 
     virtual ~NoiseTreeAnalysis() {}
 
@@ -56,6 +51,9 @@ private:
 
     // Channel number mapping tool
     HBHEChannelMap channelMap_;
+
+    // HCAL geometry tool
+    HBHEChannelGeometry channelGeometry_;
 
     // Linearized channel number (index valid up to this->PulseCount)
     unsigned channelNumber_[HBHEChannelMap::ChannelCount];

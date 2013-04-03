@@ -13,6 +13,7 @@
 #include <algorithm>
 
 #include "Filter10.h"
+#include "HBHEChannelGeometry.h"
 
 struct ChannelGroupInfo
 {
@@ -54,10 +55,13 @@ struct ChannelGroupInfo
         weightedStartTSlice = -1.0;    
         startTSlice = -1.0;
         filteredCharge = 0.0;
+        Et = 0.0;
+        phi = -1000.0;
     }
 
     template<class NoiseTreeData>
-    void fill(const std::vector<unsigned>& members,
+    void fill(const HBHEChannelGeometry& geometry,
+              const std::vector<unsigned>& members,
               const NoiseTreeData& treeData,
               const Filter10& startTimeFilter,
               const unsigned tStart, const unsigned tEnd,
@@ -76,15 +80,23 @@ struct ChannelGroupInfo
         assert(startingSlice);
         assert(filterSums);
 
+        TVector3 EtSum;
+
         double wSum = 0.0;
         double tSum = 0.0;
         for (unsigned idx=0; idx<nMembers; ++idx)
         {
-            const int iPulse = pulseNumberMap[members[idx]];
+            const unsigned ichan = members[idx];
+            const int iPulse = pulseNumberMap[ichan];
             if (iPulse >= 0)
             {
                 ++nReadout;
-                energySum += treeData.Energy[iPulse];
+
+                const double e = treeData.Energy[iPulse];
+                energySum += e;
+                const TVector3& et = geometry.getDirection(ichan)*e;
+                EtSum += et;
+
                 const double* ch = &treeData.Charge[iPulse][0];
                 for (unsigned k=0; k<10; ++k)
                     charge[k] += ch[k];
@@ -112,6 +124,9 @@ struct ChannelGroupInfo
             startTSlice = t0;
             const unsigned maxSlice = std::min(10U, tEnd - tStart + t0);
             filteredCharge = std::accumulate(charge+t0, charge+maxSlice, 0.0);
+
+            Et = EtSum.Perp();
+            phi = EtSum.Phi();
         }
     }
 
@@ -125,6 +140,8 @@ struct ChannelGroupInfo
     double weightedStartTSlice;
     double startTSlice;
     double filteredCharge;
+    double Et;
+    double phi;
 };
 
 #endif // ChannelGroupInfo_h_
