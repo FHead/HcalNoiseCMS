@@ -115,6 +115,10 @@ private:
 
     // Internal helper functions
     void loadOccupancyConverters();
+
+    double hpdDeltaPhiWithMET(unsigned hpd) const;
+    double hpdMETRemainder(unsigned hpd) const;
+
     double calculatePseudoLogLikelihood(const std::vector<unsigned>& ch) const;
 
     double staticSignalPseudoLogli(const unsigned hpd) const
