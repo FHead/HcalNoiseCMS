@@ -334,18 +334,18 @@ void NoiseTreeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                             "1-d", "Dummy", "Events",
                             1, 0.0, 1.0, Double(0.5), Double(1)));
 
-#define book_rechits_sum_histos(varname, title) do {                            \
-    if (manager_.isRequested(#varname)) {                                       \
-        manager_.manage(AutoH1D(#varname "_Magnitude", title ", magnitude",     \
-                         "1-d", "Et", "Events",                                 \
-                         2000, 0.0, 2000.0,                                     \
-                         Apply(hypot, this->varname[0], this->varname[1]),      \
-                         Double(1)));                                           \
-        manager_.manage(AutoH1D(#varname "_Phi", title ", Et-weighted Phi",     \
-                         "1-d", "Phi", "Events",                                \
-                         nPhiBins, -M_PI, M_PI,                                 \
-                         Apply(atan2, this->varname[1], this->varname[0]),      \
-                            Apply(hypot, this->varname[0], this->varname[1])));}\
+#define book_rechits_sum_histos(varname, title) do {                         \
+    if (manager_.isRequested(#varname)) {                                    \
+        manager_.manage(AutoH1D(#varname "_Magnitude", title ", magnitude",  \
+                         "1-d", "Et", "Events",                              \
+                         2000, 0.0, 2000.0,                                  \
+                         Apply(hypot, this->varname[0], this->varname[1]),   \
+                         Double(1)));                                        \
+        manager_.manage(AutoH1D(#varname "_Phi", title ", Et-weighted Phi",  \
+                         "1-d", "Phi", "Events",                             \
+                         nPhiBins, -M_PI, M_PI,                              \
+                         Apply(atan2, this->varname[1], this->varname[0]),   \
+                         Apply(hypot, this->varname[0], this->varname[1])));}\
 } while(0);
 
     book_rechits_sum_histos(EBET, "Vectorial sum of rechits in ecal barrel");
@@ -726,6 +726,17 @@ void NoiseTreeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                      Column("ChannelNumber", ElementOf(channelNumber_)),
                      Column("Energy",        ElementOf(this->Energy)),
                      TreeDatum(NumberOfGoodPrimaryVertices)
+                 )), "HBHE");
+
+    if (manager_.isRequested("qChanNtuple"))
+        manager_.manage(CycledNtuple("ChannelEnergyDependenceOnCharge",
+                                     "Channel Energy Dependence on Charge Ntuple", "HBHE",
+                 std::make_tuple(
+                     TreeDatum(RunNumber),
+                     Column("ChannelNumber", ElementOf(channelNumber_)),
+                     Column("Energy",        ElementOf(this->Energy)),
+                     Column("TS4",           ElementOf(&this->Charge[0][4], 10)),
+                     Column("TS5",           ElementOf(&this->Charge[0][5], 10))
                  )), "HBHE");
 
     if (manager_.isRequested("hbheNtuple"))

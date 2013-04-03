@@ -1,6 +1,6 @@
-OFILES = HBHEChannelMap.o HcalDetId.o HcalHPDRBXMap.o
+OFILES = HBHEChannelMap.o HcalDetId.o HcalHPDRBXMap.o fitHcalEnergies.o
 
-PROGRAMS = analyzeEChanNtuple.C
+PROGRAMS = analyzeEChanNtuple.C analyzeEChargeNtuple.C
 
 ROOTCONFIG   := root-config
 
