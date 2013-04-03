@@ -166,6 +166,9 @@ edm::Exception.
 analyzeEChanNtuple.C -- Helper executable for building energy distributions
                         out of observed samples.
 
+analyzeEChargeNtuple.C -- Fit 2-d linear regression model to the energy
+                          dependence on charge in TS4 and TS5.
+
 ChannelGroupInfo.h   -- Summary info for a group of channels. Used to
                         study channels grouped by HPD as well as those
                         channels neighboring an HPD.
@@ -174,6 +177,9 @@ DetId.h              -- The CMS detector id. Lifted from CMSSW code
                         DataFormats/DetId/interface/DetId.h.
 
 Filter10.h           -- Linear filtering for the time structure of HCAL pulses.
+
+fitHcalEnergies.h    -- Code which can be used to fit 2-d linear regression
+fitHcalEnergies.C       models (such as energy dependence on two time slices)
 
 HBHEChannelMap.h     -- Numerology for finding collections of HCAL channels
 HBHEChannelMap.C        that belong the same HPD and/or for navigating
