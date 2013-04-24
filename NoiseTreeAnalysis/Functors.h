@@ -371,6 +371,33 @@ inline ElementGEHlp<T> ElementGE(T* t, const T& value, unsigned stride=1)
 //======================================================================
 
 template<typename Result, typename T>
+class ApplyToElementHlp
+{
+public:
+    typedef Result (*CFunc)(const T&);
+
+    inline ApplyToElementHlp(CFunc f, T* t, const unsigned stride)
+        : fcn_(f), ptr_(t), stride_(stride) {assert(ptr_);}
+
+    inline Result operator()(const unsigned i) const
+        {return fcn_(ptr_[i*stride_]);}
+
+private:
+    CFunc fcn_;
+    T* ptr_;
+    unsigned stride_;
+};
+
+template<typename Result, typename T>
+inline ApplyToElementHlp<Result, T> ApplyToElement(
+    Result (*f)(const T&), T* ptr, unsigned stride=1)
+{
+    return ApplyToElementHlp<Result, T>(f, ptr, stride);
+}
+
+//======================================================================
+
+template<typename Result, typename T>
 class ElementMemberFcnHlp0
 {
 public:

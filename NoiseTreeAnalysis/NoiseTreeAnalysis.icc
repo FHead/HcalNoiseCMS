@@ -35,6 +35,12 @@ namespace {
         else
             return 0.0;
     }
+
+    unsigned extractCapId(const UInt_t& auxWord)
+    {
+        UInt_t tmp(auxWord);
+        return (tmp >> 28) & 0x3;
+    }
 }
 
 
@@ -734,6 +740,7 @@ void NoiseTreeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                  std::make_tuple(
                      TreeDatum(RunNumber),
                      Column("ChannelNumber", ElementOf(channelNumber_)),
+                     Column("CapId",         ApplyToElement(extractCapId, this->AuxWord)),
                      Column("Energy",        ElementOf(this->Energy)),
                      Column("TS4",           ElementOf(&this->Charge[0][4], 10)),
                      Column("TS5",           ElementOf(&this->Charge[0][5], 10))

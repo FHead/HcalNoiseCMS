@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <cassert>
 
 // Command line parser
 #include "CmdLine.hh"
@@ -106,8 +107,8 @@ int main(int argc, char *argv[])
          it != runNumbers.end(); ++it)
     {
         const unsigned thisRun = *it;
-        std::vector<std::vector<std::pair<float,float> > > channels(HBHEChannelMap::ChannelCount);
-        std::vector<std::vector<float> > energies(HBHEChannelMap::ChannelCount);
+        std::vector<std::vector<std::pair<float,float> > > channels(4U*HBHEChannelMap::ChannelCount);
+        std::vector<std::vector<float> > energies(4U*HBHEChannelMap::ChannelCount);
 
         for (unsigned long j=0; j<n_rows; ++j)
         {
@@ -117,29 +118,39 @@ int main(int argc, char *argv[])
             if (run == thisRun)
             {
                 const unsigned chan = data[1];
-                const unsigned nCollected = energies[chan].size();
+                assert(chan < HBHEChannelMap::ChannelCount);
+
+                const unsigned capId = data[2];
+                assert(capId < 4U);
+
+                const unsigned idx = 4U*chan + capId;
+                const unsigned nCollected = energies[idx].size();
+
                 if (nCollected < maxPoints)
                 {
-                    const float e = data[2];
-                    const float ts4 = data[3];
-                    const float ts5 = data[4];
+                    const float e = data[3];
+                    const float ts4 = data[4];
+                    const float ts5 = data[5];
 
-                    energies[chan].push_back(e);
-                    channels[chan].push_back(std::pair<float,float>(ts4,ts5));
+                    energies[idx].push_back(e);
+                    channels[idx].push_back(std::pair<float,float>(ts4,ts5));
                 }
             }
         }
 
-        for (unsigned chan=0; chan<HBHEChannelMap::ChannelCount; ++chan)
+        for (unsigned idx=0; idx<4U*HBHEChannelMap::ChannelCount; ++idx)
         {
-            const unsigned nCollected = energies[chan].size();
+            const unsigned nCollected = energies[idx].size();
             if (nCollected >= minPoints)
             {
+                const unsigned chan = idx / 4U;
+                const unsigned capId = idx % 4U;
+
                 double coeffs[3];
-                const double sqr = fitHcalEnergies(channels[chan], energies[chan], coeffs);
-                const double eTotal = std::accumulate(energies[chan].begin(), energies[chan].end(), 0.0);
-                of << thisRun << "  " << chan << "  " << coeffs[0] << "  "
-                   << coeffs[1] << "  " << coeffs[2] << "  "
+                const double sqr = fitHcalEnergies(channels[idx], energies[idx], coeffs);
+                const double eTotal = std::accumulate(energies[idx].begin(), energies[idx].end(), 0.0);
+                of << thisRun << "  " << chan << "  " << capId << "  "
+                   << coeffs[0] << "  " << coeffs[1] << "  " << coeffs[2] << "  "
                    << nCollected << "  " << sqr << "  "
                    << eTotal/nCollected << endl;
             }
