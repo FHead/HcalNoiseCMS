@@ -1,6 +1,10 @@
-OFILES = HBHEChannelMap.o HcalDetId.o HcalHPDRBXMap.o fitHcalEnergies.o
+OFILES = HBHEChannelMap.o HcalDetId.o HcalHPDRBXMap.o HBHEChannelGeometry.o \
+         fitHcalEnergies.o HcalPulseShape.o HcalPulseShapes.o \
+         HcalShapeIntegrator.o HcalTimeSlew.o HcalPulseContainmentAlgo.o \
+         HcalPulseContainmentCorrection.o
 
-PROGRAMS = analyzeEChanNtuple.C analyzeEChargeNtuple.C
+PROGRAMS = analyzeEChanNtuple.C analyzeEChargeNtuple.C \
+         dumpContainmentCorrection.C
 
 ROOTCONFIG   := root-config
 

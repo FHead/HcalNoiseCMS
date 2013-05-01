@@ -149,10 +149,11 @@ int main(int argc, char *argv[])
                 double coeffs[3];
                 const double sqr = fitHcalEnergies(channels[idx], energies[idx], coeffs);
                 const double eTotal = std::accumulate(energies[idx].begin(), energies[idx].end(), 0.0);
+                const double eMean = eTotal/nCollected;
+
                 of << thisRun << "  " << chan << "  " << capId << "  "
                    << coeffs[0] << "  " << coeffs[1] << "  " << coeffs[2] << "  "
-                   << nCollected << "  " << sqr << "  "
-                   << eTotal/nCollected << endl;
+                   << nCollected << "  " << eMean << "  " << sqr/eMean << endl;
             }
         }
     }

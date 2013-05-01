@@ -1,5 +1,8 @@
 OFILES = HistogramManager.o NoiseTreeData.o HBHEChannelMap.o HcalDetId.o \
-         HcalHPDRBXMap.o HBHEChannelGeometry.o
+         HcalHPDRBXMap.o HBHEChannelGeometry.o fitHcalEnergies.o \
+         HcalPulseShape.o HcalPulseShapes.o HcalShapeIntegrator.o \
+         HcalTimeSlew.o HcalPulseContainmentAlgo.o \
+         HcalPulseContainmentCorrection.o
 
 PROGRAMS = exampleTreeAnalysis.ana runNoiseTreeAnalysis.ana
 

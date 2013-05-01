@@ -21,6 +21,7 @@
 #include "Filter10.h"
 #include "time_stamp.h"
 #include "deltaPhi.h"
+#include "HcalPulseShapes.h"
 
 #include "npstat/wrap/stringArchiveIO.hh"
 #include "geners/Reference.hh"
@@ -55,8 +56,14 @@ NoiseTreeAnalysis<Options,RootMadeClass>::NoiseTreeAnalysis(
       verbose_(verbose),
       manager_(outputfile, histoRequest),
       channelGeometry_(options_.hbGeometryFile.c_str(),
-                       options_.heGeometryFile.c_str())
+                       options_.heGeometryFile.c_str()),
+      corr_(0)
 {
+    HcalPulseShapes allPulseShapes;
+    const HcalPulseShape* pulseShape = &allPulseShapes.getShape(
+        options_.hpdShapeNumber);
+    corr_ = new HcalPulseContainmentCorrection(
+        pulseShape, 2, options_.correctionPhaseNS, 0.002);
 }
 
 
@@ -224,6 +231,10 @@ int NoiseTreeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
             signalFraction_[i] = integSums_[i]/chargeSums_[i];
         else
             signalFraction_[i] = -1.0;
+
+        // Reverse the pulse containment correction
+        const double q45 = charge[4] + charge[5];
+        uncorrectedE_[i] = this->Energy[i]/corr_->getCorrection(q45);
 
         // Integrate the pedestals
         const double* ped = &this->Pedestal[i][0];
@@ -741,7 +752,7 @@ void NoiseTreeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                      TreeDatum(RunNumber),
                      Column("ChannelNumber", ElementOf(channelNumber_)),
                      Column("CapId",         ApplyToElement(extractCapId, this->AuxWord)),
-                     Column("Energy",        ElementOf(this->Energy)),
+                     Column("UncorrectedE",  ElementOf(uncorrectedE_)),
                      Column("TS4",           ElementOf(&this->Charge[0][4], 10)),
                      Column("TS5",           ElementOf(&this->Charge[0][5], 10))
                  )), "HBHE");

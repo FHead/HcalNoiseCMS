@@ -44,9 +44,11 @@ struct NoiseTreeAnalysisOptions
         : hbGeometryFile("Geometry/hb.ctr"),
           heGeometryFile("Geometry/he.ctr"),
           maxLogContribution(10.0),
+          correctionPhaseNS(6.0),
           nPhiBins(144),
           minTSlice(4),
-          maxTSlice(6)
+          maxTSlice(6),
+          hpdShapeNumber(105)
     {
     }
 
@@ -56,9 +58,11 @@ struct NoiseTreeAnalysisOptions
         cmdline.option(NULL, "--hbgeo") >> hbGeometryFile;
         cmdline.option(NULL, "--hegeo") >> heGeometryFile;
         cmdline.option(NULL, "--maxLogContribution") >> maxLogContribution;
+        cmdline.option(NULL, "--correctionPhaseNS") >> correctionPhaseNS;
         cmdline.option(NULL, "--nPhiBins") >> nPhiBins;
         cmdline.option(NULL, "--minTSlice") >> minTSlice;
         cmdline.option(NULL, "--maxTSlice") >> maxTSlice;
+        cmdline.option(NULL, "--hpdShapeNumber") >> hpdShapeNumber;
 
         if (minTSlice > 10 || maxTSlice > 10 || minTSlice >= maxTSlice)
             throw CmdLineError("Invalid specification for time slice integration");
@@ -73,9 +77,11 @@ struct NoiseTreeAnalysisOptions
            << " [--hbgeo filename]"
            << " [--hegeo filename]"
            << " [--maxLogContribution value]"
+           << " [--correctionPhaseNS value]"
            << " [--nPhiBins nBins]"
            << " [--minTSlice tSlice]"
            << " [--maxTSlice tSlice]"
+           << " [--hpdShapeNumber value]"
             ;
     }
 
@@ -84,10 +90,13 @@ struct NoiseTreeAnalysisOptions
     std::string heGeometryFile;
 
     double maxLogContribution;
+    double correctionPhaseNS;
 
     unsigned nPhiBins;
     unsigned minTSlice;
     unsigned maxTSlice;
+
+    int hpdShapeNumber;
 };
 
 std::ostream& operator<<(std::ostream& os, const NoiseTreeAnalysisOptions& o)
@@ -96,9 +105,11 @@ std::ostream& operator<<(std::ostream& os, const NoiseTreeAnalysisOptions& o)
        << ", hbgeo = \"" << o.hbGeometryFile << '"'
        << ", hegeo = \"" << o.heGeometryFile << '"'
        << ", maxLogContribution = " << o.maxLogContribution
+       << ", correctionPhaseNS = " << o.correctionPhaseNS
        << ", nPhiBins = " << o.nPhiBins
        << ", minTSlice = " << o.minTSlice
        << ", maxTSlice = " << o.maxTSlice
+       << ", hpdShapeNumber = " << o.hpdShapeNumber
         ;
     return os;
 }

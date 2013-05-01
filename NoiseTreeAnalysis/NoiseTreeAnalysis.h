@@ -6,6 +6,7 @@
 #include "HBHEChannelMap.h"
 #include "HBHEChannelGeometry.h"
 #include "ChannelGroupInfo.h"
+#include "HcalPulseContainmentCorrection.h"
 
 #include "npstat/stat/LeftCensoredDistribution.hh"
 
@@ -25,7 +26,7 @@ public:
                       unsigned long maxEvents, bool verbose,
                       const Options& opt);
 
-    virtual ~NoiseTreeAnalysis() {}
+    virtual ~NoiseTreeAnalysis() {delete corr_;}
 
     inline const Options& getOptions() const {return options_;}
     inline bool isVerbose() const {return verbose_;}
@@ -88,6 +89,10 @@ private:
     // (up to this->PulseCount)
     double filterSums_[HBHEChannelMap::ChannelCount];
 
+    // "Uncorrected" energy with pulse containment correction removed
+    // (up to this->PulseCount)
+    double uncorrectedE_[HBHEChannelMap::ChannelCount];
+
     // Summary info for channels grouped by HPDs
     ChannelGroupInfo hpdInfo_[HcalHPDRBXMap::NUM_HPDS];
 
@@ -112,6 +117,9 @@ private:
     // into occupancy above that energy and back
     typedef std::shared_ptr<npstat::LeftCensoredDistribution> OccConverterPtr;
     std::vector<OccConverterPtr> occupancyCoverters_;
+
+    // Pulse containment correction
+    HcalPulseContainmentCorrection* corr_;
 
     // Internal helper functions
     void loadOccupancyConverters();
