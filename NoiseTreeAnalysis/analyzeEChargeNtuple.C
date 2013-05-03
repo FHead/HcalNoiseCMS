@@ -91,6 +91,9 @@ int main(int argc, char *argv[])
     }
     of.precision(12);
 
+    // The channel map (for eCorr flag)
+    HBHEChannelMap chmap;
+
     // Cycle over the ntuple and figure out the run numbers
     std::set<unsigned> runNumbers;
     for (unsigned long j=0; j<n_rows; ++j)
@@ -151,9 +154,16 @@ int main(int argc, char *argv[])
                 const double eTotal = std::accumulate(energies[idx].begin(), energies[idx].end(), 0.0);
                 const double eMean = eTotal/nCollected;
 
+                unsigned iphi = 0;
+                int ieta = 0, has_eCorr = 1;
+                chmap.getChannelTriple(chan, 0, &ieta, &iphi);
+                if (!(iphi==6 && ieta<0 && ieta>-16) && !(iphi==32 && ieta<0 && ieta>-8))
+                    has_eCorr = 0;
+
                 of << thisRun << "  " << chan << "  " << capId << "  "
                    << coeffs[0] << "  " << coeffs[1] << "  " << coeffs[2] << "  "
-                   << nCollected << "  " << eMean << "  " << sqr/eMean << endl;
+                   << nCollected << "  " << eMean << "  " << sqr/eMean << "  " 
+                   << has_eCorr << endl;
             }
         }
     }
