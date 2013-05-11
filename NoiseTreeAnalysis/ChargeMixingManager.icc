@@ -1,0 +1,130 @@
+#include <cassert>
+#include <stdexcept>
+#include <sstream>
+#include <iostream>
+
+#include "TChain.h"
+#include "skipComments.h"
+#include "time_stamp.h"
+
+#include "geners/Reference.hh"
+#include "geners/StringArchive.hh"
+
+#include "npstat/wrap/stringArchiveIO.hh"
+
+template <class RootMadeClass>
+ChargeMixingManager<RootMadeClass>::ChargeMixingManager(
+    const std::string& objectConfigFile, const bool verbose)
+    : verbose_(verbose)
+{
+    typedef gs::Reference<npstat::AbsDiscreteDistribution1D> DRef;
+
+    // Read the mixing distributions from the object config file
+    std::unique_ptr<gs::StringArchive> ar(
+        npstat::readCompressedStringArchiveExt(objectConfigFile.c_str()));
+    DRef ref1(*ar, "Event Distribution", "Mixing");
+    DRef ref2(*ar, "TS Distribution", "Mixing");
+    if (!(ref1.unique() && ref2.unique()))
+    {
+        std::ostringstream os;
+        os << "In ChargeMixingManager constructor: failed to read mixing "
+           << "distributions from the config file \"" << objectConfigFile << '"';
+        throw std::invalid_argument(os.str());
+    }
+    eventDistro = ref1.get(0);
+    tsShiftDistro = ref2.get(0);
+}
+
+
+template <class RootMadeClass>
+bool ChargeMixingManager<RootMadeClass>::loadEventsToMix(
+    const std::string& listOfFilesToMix, const char* mixedTreeName,
+    const HBHEChannelMap& chmap)
+{
+    assert(mixedTreeName);
+
+    // Figure out which files will be used for charge mixing
+    std::vector<std::string> filesToMix;
+    const bool isGood = skipComments(listOfFilesToMix.c_str(), &filesToMix);
+    if (filesToMix.empty() || !isGood)
+    {
+        std::cerr << "Error in ChargeMixingManager::loadEventsToMix: "
+                  << "failed to read the list of files to mix from file \"" 
+                  << listOfFilesToMix << '"' << std::endl;
+        return false;
+    }
+
+    // Create the input chain for charge mixing
+    TChain chain(mixedTreeName);
+    const unsigned nFiles = filesToMix.size();
+    for (unsigned i=0; i<nFiles; ++i)
+        chain.Add(filesToMix[i].c_str());
+
+    if (verbose_)
+    {
+        std::cout << time_stamp() << ": Loading tree \""
+                  << mixedTreeName << "\" for charge mixing from file"
+                  << (nFiles > 1 ? "s " : " ");
+        for (unsigned i=0; i<nFiles; ++i)
+        {
+            if (i) std::cout << ", ";
+            std::cout << filesToMix[i];
+        }
+        std::cout << std::endl;
+    }
+
+    // Create the tree data class for use with this chain
+    RootMadeClass dataTree(&chain);
+
+    // Load the events
+    Long64_t jentry = 0;
+    const Long64_t nentries = chain.GetEntriesFast();
+    for (; jentry < nentries; ++jentry)
+    {
+        const Long64_t ientry = dataTree.LoadTree(jentry);
+        if (ientry < 0) break;
+        chain.GetEntry(jentry);
+        if (this->Cut(dataTree) < 0)
+            continue;
+        events.push_back(EPtr(new EventChargeInfo(dataTree, chmap)));
+    }
+
+    if (verbose_)
+        std::cout << time_stamp() << ": Will use " << events.size()
+                  << " out of " << jentry << " events for charge mixing"
+                  << std::endl;
+
+    return !events.empty();
+}
+
+
+template <class RootMadeClass>
+void ChargeMixingManager<RootMadeClass>::prepareMix(
+    npstat::AbsRandomGenerator& rng,
+    const HBHEChannelMap& chmap, MixedChargeInfo* info) const
+{
+    assert(info);
+    info->clear();
+
+    // Check that we have some events to mix
+    const unsigned long sz = events.size();
+    if (!sz)
+        throw std::runtime_error("Error in ChargeMixingManager::prepareMix: "
+                                 "load some events before calling this method");
+
+    // How many events will be mixed?
+    long nMix, tsShift;
+    eventDistro->random(rng, &nMix);
+
+    // Fill out the charge mixing info with nMix events
+    long nMixed = 0;
+    while (nMixed < nMix)
+    {
+        unsigned long eventNum = sz*rng();
+        if (eventNum >= sz)
+            eventNum = sz - 1;
+        tsShiftDistro->random(rng, &tsShift);
+        info->addEvent(events[eventNum], tsShift);
+        ++nMixed;
+    }
+}

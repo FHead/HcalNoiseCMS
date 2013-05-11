@@ -4,7 +4,7 @@ OFILES = HBHEChannelMap.o HcalDetId.o HcalHPDRBXMap.o HBHEChannelGeometry.o \
          HcalPulseContainmentCorrection.o
 
 PROGRAMS = analyzeEChanNtuple.C analyzeEChargeNtuple.C \
-         dumpContainmentCorrection.C
+         dumpContainmentCorrection.C gssaDump.C
 
 ROOTCONFIG   := root-config
 

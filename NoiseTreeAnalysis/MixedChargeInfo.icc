@@ -1,0 +1,43 @@
+template <class TreeData>
+int MixedChargeInfo::mixWithData(const HBHEChannelMap& chmap,
+                                 TreeData* data) const
+{
+    // Flag mixed channels so that we don't mix them twice
+    char mixed[HBHEChannelMap::ChannelCount] = {0,};
+
+    int i=0;
+    for (; i<data->PulseCount; ++i)
+    {
+        const unsigned ch = chmap.linearIndex(
+            data->Depth[i], data->IEta[i], data->IPhi[i]);
+        if (addedReadouts[ch])
+        {
+            // There is charge to mix for this channel
+            for (unsigned ts=0; ts<nTimeSlices; ++ts)
+                data->Charge[i][ts] += this->addedCharge[ch][ts];
+            mixed[ch] = 1;
+        }
+    }
+
+    if (mixExtraChannels_)
+        for (unsigned ch=0; ch<HBHEChannelMap::ChannelCount; ++ch)
+            if (addedReadouts[ch] && !mixed[ch])
+            {
+                unsigned depth, iphi;
+                chmap.getChannelTriple(ch, &depth, &data->IEta[i], &iphi);
+                data->Depth[i] = depth;
+                data->IPhi[i] = iphi;
+                for (unsigned ts=0; ts<nTimeSlices; ++ts)
+                {
+                    data->Charge[i][ts] = this->addedCharge[ch][ts];
+                    data->Pedestal[i][ts] = 0.0;
+                }
+                data->Energy[i] = 0.0;
+                data->RecHitTime[i] = 0.0;
+                data->FlagWord[i] = 0;
+                data->AuxWord[i]= 0;
+                ++i;
+            }
+
+    return i;
+}
