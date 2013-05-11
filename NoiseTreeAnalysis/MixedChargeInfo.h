@@ -1,6 +1,27 @@
 #ifndef MixedChargeInfo_h_
 #define MixedChargeInfo_h_
 
+//
+// This class contains all information necessary to mix extra charge
+// to a given event represented by NoiseTreeData or another similar
+// class. It works in tandem with ChargeMixingManager.
+//
+// The expected usage pattern of this class is as follows:
+//
+// 1) Create an instance of this class at the beginning of a job.
+//
+// 2) For every event, call the "prepareMix" method of the
+//    ChargeMixingManager class. Then call the "mixWithData" method
+//    of this class to add extra charge to NoiseTreeData.
+//
+// In addistion to the added charge, this class contains the summary
+// of the corresponding added energy, number of primary vertices, etc.
+// which can be examined by the analysis code.
+//
+// I. Volobouev
+// May 2013
+//
+
 #include <memory>
 
 #include "EventChargeInfo.h"
@@ -24,7 +45,8 @@ public:
     MixedChargeInfo(bool mixExtraChannels = false,
                     int centralTimeSlice = 4);
 
-    // Function which adds one event with the given time slice shift
+    // Function which adds one event with the given time slice shift.
+    // Will be used by "ChargeMixingManager" to add charge incrementally.
     void addEvent(std::shared_ptr<const EventChargeInfo> eventInfo, int tsShift);
 
     // Function which clears all collected information.

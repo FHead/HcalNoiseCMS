@@ -1,6 +1,13 @@
 #ifndef CHANNELCHARGEINFO_H_
 #define CHANNELCHARGEINFO_H_
 
+//
+// Struct which contains charge-related information for a single HBHE channel
+//
+// I. Volobouev
+// May 2013
+//
+
 #include <cstring>
 
 struct ChannelChargeInfo
@@ -9,6 +16,11 @@ struct ChannelChargeInfo
         nTimeSlices = 10U
     };
 
+    //
+    // Create this object from NoiseTreeData or another similar class.
+    // "treeIndex" is the "pulse number". "hbheIndex" is the id assigned
+    // to this channel by the HBHEChannelMap class.
+    //
     template<class TreeData>
     inline ChannelChargeInfo(const TreeData& data,
                              const unsigned treeIndex,

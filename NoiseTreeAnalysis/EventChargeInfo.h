@@ -1,6 +1,13 @@
 #ifndef EventChargeInfo_h_
 #define EventChargeInfo_h_
 
+//
+// Struct which contains charge-related information for a single event
+//
+// I. Volobouev
+// May 2013
+//
+
 #include <vector>
 
 #include "ChannelChargeInfo.h"
@@ -8,6 +15,9 @@
 
 struct EventChargeInfo
 {
+    //
+    // Create this object from NoiseTreeData or another similar class
+    //
     template<class TreeData>
     inline EventChargeInfo(const TreeData& data,
                            const HBHEChannelMap& chmap)
@@ -24,7 +34,8 @@ struct EventChargeInfo
         }
     }
 
-    // Collecion of infos about individual channels
+    // Collecion of objects which carry charge information
+    // for individual channels
     std::vector<ChannelChargeInfo> channelInfos;
 
     // Information about this event from NoiseTreeData

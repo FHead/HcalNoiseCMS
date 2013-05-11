@@ -8,6 +8,18 @@
 // of mixed events and time shifts, generation of appropriate random
 // numbers, etc.
 //
+// The expected usage of this class is as follows:
+//
+// 1) Create one instance of it per job.
+//
+// 2) Call "loadEventsToMix" at the beginning of a job, before
+//    going into the event cycle.
+//
+// 3) For every event, call "prepareMix" method which will
+//    fill out an instance of "MixedChargeInfo" object. Then
+//    call "mixWithData" method of MixedChargeInfo to add extra
+//    charge to NoiseTreeData.
+//
 // It might make sense to derive from this class and override the
 // "Cut" function if you don't like the default filter used to
 // select admixed events.
@@ -36,19 +48,32 @@ public:
     // If "verbose" is true, the manager will print some diagnostics
     // to the standard output while it operates.
     //
-    explicit ChargeMixingManager(const std::string& objectConfigFile,
-                                 bool verbose);
+    ChargeMixingManager(const std::string& objectConfigFile, bool verbose);
 
     inline virtual ~ChargeMixingManager() {}
 
     // The following function should be called at the beginning
     // of the job to load the chain of mixed events. Returns "true"
-    // on success and "false" on failure.
+    // on success and "false" on failure. The argument are as follows:
+    //
+    // fileWithFileNames -- The name of text file which contains the
+    //                      file names of root files with events that
+    //                      will be used as sources of admixed charge.
+    //                      These file names should be included using
+    //                      one entry per line. Such a file can be easily
+    //                      created by "ls", for example,
+    //                      ls /this/and/that/NoiseTree_*.root > list.txt
+    //
+    // mixedTreeName     -- The tree name in the root files, typically 
+    //                      should be set to "ExportTree/HcalNoiseTree"
+    //
+    // chmap             -- Channel numbering scheme
+    //
     virtual bool loadEventsToMix(const std::string& fileWithFileNames,
                                  const char* mixedTreeName,
                                  const HBHEChannelMap& chmap);
 
-    // Check how many events were loaded
+    // Check how many events were loaded by "loadEventsToMix"
     inline unsigned long mixedEventCount() const {return events.size();}
 
     // The following function fills MixedChargeInfo object
@@ -66,7 +91,7 @@ private:
     ChargeMixingManager* operator=(const ChargeMixingManager&);
 
     // The "Cut" function should return 1 if entry is accepted for mixing
-    // and -1 otherwise (same convention as in "root")
+    // and -1 otherwise (same convention as in "root"). Override as necessary.
     inline virtual int Cut(const RootMadeClass& dataTree) const
     {
         if (dataTree.NumberOfGoodPrimaryVertices > 0 &&
