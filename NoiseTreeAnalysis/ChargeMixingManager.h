@@ -69,6 +69,12 @@ public:
     //
     // chmap             -- Channel numbering scheme
     //
+    // Note that this code will attempt to load the charge-related event
+    // information into memory from all events that pass the selection cut.
+    // It is therefore can be unwise to load too many events, as the computer
+    // memory can be exhausted. The loading operation by itself is not very
+    // fast either -- on my laptop the speed is about 500 events/sec.
+    //
     virtual bool loadEventsToMix(const std::string& fileWithFileNames,
                                  const char* mixedTreeName,
                                  const HBHEChannelMap& chmap);
