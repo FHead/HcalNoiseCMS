@@ -19,6 +19,8 @@ ROOTLIBS     := $(shell $(ROOTCONFIG) --libs)
 ROOTGLIBS    := $(shell $(ROOTCONFIG) --glibs)
 HASTHREAD    := $(shell $(ROOTCONFIG) --has-thread)
 
+PYTHON_INC   := $(shell python -c 'import distutils.sysconfig; print "-I"+distutils.sysconfig.get_config_var("INCLDIRSTOMAKE").replace(" ", " -I")')
+
 CXXFLAGS     += $(ROOTCFLAGS)
 LDFLAGS      += $(ROOTLDFLAGS)
 
@@ -38,7 +40,11 @@ LINKFLAGS = -fPIC -g -std=c++0x
 
 BINARIES = $(PROGRAMS:.C=)
 
-all: $(BINARIES)
+all: _npstat.so $(BINARIES)
+
+_npstat.so: npstat_wrap_v1_3_0.cc
+	$(CXX) -c $(CXXFLAGS) $(PYTHON_INC) -DSWIG -o npstat_wrap.o npstat_wrap_v1_3_0.cc
+	$(CXX) $(LINKFLAGS) -fPIC -shared -o _npstat.so npstat_wrap.o $(LIBS)
 
 $(BINARIES): % : %.o $(OFILES); g++ $(LINKFLAGS) -o $@ $^ $(LIBS)
 
