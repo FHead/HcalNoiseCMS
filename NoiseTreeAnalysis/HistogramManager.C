@@ -12,7 +12,7 @@ HistogramManager::HistogramManager(const std::string& outputfile,
     if (!outputfile_.IsOpen())
     {
         std::ostringstream os;
-        os << "In HistogramManager constructor: faled to open file \""
+        os << "In HistogramManager constructor: failed to open file \""
            << outputfile << '"';
         throw std::invalid_argument(os.str());
     }
