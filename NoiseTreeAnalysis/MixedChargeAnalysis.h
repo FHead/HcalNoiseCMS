@@ -15,6 +15,11 @@
 #include "ChargeMixingManager.h"
 #include "MixedChargeInfo.h"
 #include "HBHEChannelMap.h"
+#include "ChannelChargeMix.h"
+
+#include "geners/AbsArchive.hh"
+
+#include "npstat/stat/AbsNtuple.hh"
 
 // The class template parameters are:
 // 
@@ -138,8 +143,21 @@ private:
     // Random number generator
     npstat::AbsRandomGenerator* rng_;
 
+    // Linearized channel number (index valid up to this->PulseCount)
+    unsigned channelNumber_[HBHEChannelMap::ChannelCount];
+
     // Number of readouts mixed with the channel (up to this->PulseCount)
     unsigned readoutsMixed_[HBHEChannelMap::ChannelCount];
+
+    // Charge before mixing and charge added (up to this->PulseCount)
+    double chargeBeforeMixing_[HBHEChannelMap::ChannelCount];
+    double chargeAdded_[HBHEChannelMap::ChannelCount];
+
+    // Archive for writing out the channel data
+    gs::AbsArchive* channelAr_;
+
+    // Ntuple for the channel data
+    npstat::AbsNtuple<ChannelChargeMix>* channelNtuple_;
 
     // Method to call in order to perform charge mixing.
     // Returns the number of channels in the combined event.

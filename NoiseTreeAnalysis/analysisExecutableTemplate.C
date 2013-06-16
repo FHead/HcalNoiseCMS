@@ -7,6 +7,7 @@
 
 #include <climits>
 #include <iostream>
+#include <stdexcept>
 
 // The next "#include" statement gets replaced
 #include "ANALYSIS_HEADER_FILE"
@@ -65,9 +66,15 @@ int main(int argc, char *argv[])
             infiles.push_back(s);
         }
     }
-    catch (CmdLineError& e) {
+    catch (const CmdLineError& e) {
         cerr << "Error in " << cmdline.progname() << ": "
              << e.str() << endl;
+        print_usage(cmdline.progname(), opts);
+        return 1;
+    }
+    catch (const std::invalid_argument& ia) {
+        cerr << "Error in " << cmdline.progname() << ": "
+             << ia.what() << endl;
         print_usage(cmdline.progname(), opts);
         return 1;
     }

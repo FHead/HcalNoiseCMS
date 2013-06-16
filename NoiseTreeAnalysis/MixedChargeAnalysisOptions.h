@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "CmdLine.hh"
+#include "inputValidation.hh"
 
 //
 // Class MixedChargeAnalysisOptions must have
@@ -42,7 +43,9 @@ struct MixedChargeAnalysisOptions
 {
     MixedChargeAnalysisOptions()
         : randomSeed(0UL),
-          centralTS(4)
+          centralTS(4),
+          minResponseTS(4),
+          maxResponseTS(6)
     {
     }
 
@@ -52,21 +55,34 @@ struct MixedChargeAnalysisOptions
         cmdline.require("-m", "--mixFile") >> mixListFile;
         cmdline.require("-r", "--randomSeed") >> randomSeed;
 
+        cmdline.option(NULL, "--channelArchive") >> channelArchive;
         cmdline.option(NULL, "--centralTS") >> centralTS;
+        cmdline.option(NULL, "--minResponseTS") >> minResponseTS;
+        cmdline.option(NULL, "--maxResponseTS") >> maxResponseTS;
 
         mixExtraChannels = cmdline.has("-e", "--mixExtra");
+
+        validateRangeLELT(minResponseTS, "minResponseTS", 0U, 9U);
+        validateRangeLELT(maxResponseTS, "maxResponseTS", minResponseTS+1U, 10U);
     }
 
     void usage(std::ostream& os) const
     {
-        os << "-c configFile -m mixFile -r randomSeed "
-           << "[-e] [--centralTS value]";
+        os << "-c configFile -m mixFile -r randomSeed [-e]"
+           << " [--channelArchive archiveName]"
+           << " [--centralTS value]"
+           << " [--minResponseTS value]"
+           << " [--maxResponseTS value]"
+            ;
     }
 
     std::string objConfigFile;
     std::string mixListFile;
+    std::string channelArchive;
     unsigned long randomSeed;
     int centralTS;
+    unsigned minResponseTS;
+    unsigned maxResponseTS;
     bool mixExtraChannels;
 };
 
@@ -74,8 +90,11 @@ std::ostream& operator<<(std::ostream& os, const MixedChargeAnalysisOptions& o)
 {
     os << "objConfigFile = \"" << o.objConfigFile << '"'
        << ", mixListFile = \"" << o.mixListFile << '"'
+       << ", channelArchive = \"" << o.channelArchive << '"'
        << ", randomSeed = " << o.randomSeed
        << ", centralTS = " << o.centralTS
+       << ", minResponseTS = " << o.minResponseTS
+       << ", maxResponseTS = " << o.maxResponseTS
        << ", mixExtraChannels = " << o.mixExtraChannels
         ;
     return os;

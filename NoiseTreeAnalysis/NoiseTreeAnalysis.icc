@@ -23,7 +23,7 @@
 #include "deltaPhi.h"
 #include "HcalPulseShapes.h"
 
-#include "npstat/wrap/stringArchiveIO.hh"
+#include "geners/stringArchiveIO.hh"
 #include "geners/Reference.hh"
 
 
@@ -103,7 +103,7 @@ void NoiseTreeAnalysis<Options,RootMadeClass>::loadOccupancyConverters()
 {
     if (!options_.convertersGSSAFile.empty())
     {
-        gs::StringArchive* ar = npstat::readCompressedStringArchive(
+        gs::StringArchive* ar = gs::readCompressedStringArchive(
             options_.convertersGSSAFile.c_str());
         occupancyCoverters_.reserve(HBHEChannelMap::ChannelCount);
  

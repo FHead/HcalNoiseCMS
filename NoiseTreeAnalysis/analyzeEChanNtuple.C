@@ -22,7 +22,7 @@
 #include "npstat/stat/QuantileTable1D.hh"
 #include "npstat/stat/LeftCensoredDistribution.hh"
 
-#include "npstat/wrap/stringArchiveIO.hh"
+#include "geners/stringArchiveIO.hh"
 
 
 using namespace std;

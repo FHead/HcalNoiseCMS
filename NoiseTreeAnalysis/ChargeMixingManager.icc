@@ -8,9 +8,7 @@
 #include "time_stamp.h"
 
 #include "geners/Reference.hh"
-#include "geners/StringArchive.hh"
-
-#include "npstat/wrap/stringArchiveIO.hh"
+#include "geners/stringArchiveIO.hh"
 
 template <class RootMadeClass>
 ChargeMixingManager<RootMadeClass>::ChargeMixingManager(
@@ -21,7 +19,7 @@ ChargeMixingManager<RootMadeClass>::ChargeMixingManager(
 
     // Read the mixing distributions from the object config file
     std::unique_ptr<gs::StringArchive> ar(
-        npstat::readCompressedStringArchiveExt(objectConfigFile.c_str()));
+        gs::readCompressedStringArchiveExt(objectConfigFile.c_str()));
     DRef ref1(*ar, "Event Distribution", "Mixing");
     DRef ref2(*ar, "TS Distribution", "Mixing");
     if (!(ref1.unique() && ref2.unique()))

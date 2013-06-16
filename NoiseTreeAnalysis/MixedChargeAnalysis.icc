@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 #include "AutoH1D.h"
 #include "AutoH2D.h"
@@ -14,7 +15,10 @@
 #include "Functors.h"
 #include "time_stamp.h"
 
+#include "geners/BinaryFileArchive.hh"
+
 #include "npstat/rng/MersenneTwister.hh"
+#include "npstat/stat/ArchivedNtuple.hh"
 
 
 template <class Options, class RootMadeClass>
@@ -30,8 +34,15 @@ MixedChargeAnalysis<Options,RootMadeClass>::MixedChargeAnalysis(
       mixManager_(new ChargeMixingManager<RootMadeClass>(
                       opts.objConfigFile, verbose)),
       mixInfo_(opts.mixExtraChannels, opts.centralTS),
-      rng_(new npstat::MersenneTwister(opts.randomSeed))
+      rng_(0),
+      channelAr_(0),
+      channelNtuple_(0)
 {
+    if (opts.randomSeed)
+        rng_ = new npstat::MersenneTwister(opts.randomSeed);
+    else
+        // Default constructor will pick the RNG seed from /dev/urandom
+        rng_ = new npstat::MersenneTwister();
 }
 
 
@@ -72,12 +83,44 @@ int MixedChargeAnalysis<Options,RootMadeClass>::beginJob()
     if (verbose_)
         std::cout << "Analysis options are: " << options_ << std::endl;
 
+    // Try to open the archive for storing the mixed charge data
+    if (!options_.channelArchive.empty())
+    {
+        channelAr_ = new gs::BinaryFileArchive(options_.channelArchive.c_str(),
+                                               "w:z=z");
+        if (!channelAr_->isOpen())
+        {
+            std::cerr << "Failed to open archive \"" << options_.channelArchive
+                      << "\" for writing" << std::endl;
+            return 1;
+        }
+
+        const char* title = "Mixed Charge Ntuple";
+        channelNtuple_ = new npstat::ArchivedNtuple<ChannelChargeMix>(
+            npstat::ntupleColumns("MixedCharge"), title,
+            *channelAr_, title, "", 1000000/sizeof(ChannelChargeMix));
+    }
+
     // Load events used for charge mixing
+    if (verbose_)
+    {
+        std::cout << "Loading events for charge mixing... ";
+        std::cout.flush();
+    }        
     TChain* chain = dynamic_cast<TChain*>(this->fChain);
     assert(chain);
     if (!mixManager_->loadEventsToMix(options_.mixListFile,
                                       chain->GetName(), channelMap_))
+    {
+        if (verbose_)
+            std::cout << "Failed" << std::endl;
         return 1;
+    }
+    if (verbose_)
+    {
+        std::cout << "Done\n";
+        std::cout.flush();
+    }
 
     // Book histograms
     bookManagedHistograms();
@@ -91,18 +134,43 @@ int MixedChargeAnalysis<Options,RootMadeClass>::beginJob()
 template <class Options, class RootMadeClass>
 int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
 {
-    // const int numAllChannels = mixExtraCharge();
-    mixExtraCharge();
-
-    // Cycle over channel data
+    // Cycle over channel data before mixing the charge
     for (Int_t i=0; i<this->PulseCount; ++i)
     {
         // Determine and remember the channel number for the given "pulse"
         const unsigned chNum = channelMap_.linearIndex(
             this->Depth[i], this->IEta[i], this->IPhi[i]);
+        channelNumber_[i] = chNum;
 
+        const double* charge = &this->Charge[i][0];
+        chargeBeforeMixing_[i] = std::accumulate(
+            charge+options_.minResponseTS, charge+options_.maxResponseTS, 0.0);
+    }
+
+    // Mix the extra charge
+    // const int numAllChannels = mixExtraCharge();
+    mixExtraCharge();
+
+    // Cycle over channel data after mixing the charge
+    for (Int_t i=0; i<this->PulseCount; ++i)
+    {
         // Figure out how many pulses will be mixed for this channel
+        const unsigned chNum = channelNumber_[i];
         readoutsMixed_[i] = mixInfo_.addedReadouts[chNum];
+
+        // Figure out how much charge was added
+        const double* charge = &this->Charge[i][0];
+        const double chargeAfterMixing = std::accumulate(
+            charge+options_.minResponseTS, charge+options_.maxResponseTS, 0.0);
+        chargeAdded_[i] = chargeAfterMixing - chargeBeforeMixing_[i];
+
+        // Fill out the channel-by-channel information for subsequent fitting
+        if (channelNtuple_)
+        {
+            ChannelChargeMix mix(*this, mixInfo_,
+                                 chargeBeforeMixing_[i], i, chNum);
+            channelNtuple_->fill(mix);
+        }
     }
 
     fillManagedHistograms();
@@ -113,6 +181,9 @@ int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
 template <class Options, class RootMadeClass>
 int MixedChargeAnalysis<Options,RootMadeClass>::endJob()
 {
+    delete channelNtuple_; channelNtuple_ = 0;
+    delete channelAr_; channelAr_ = 0;
+
     return 0;
 }
 
@@ -138,8 +209,7 @@ void MixedChargeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
 
     //
     // Managed histograms in the TS group.
-    // These histos will be filled 10
-    // times per event.
+    // These histos will be filled 10 times per event.
     //
     if (manager_.isRequested("MixedEventsTS"))
         manager_.manage(CycledH2D("MixedEventsTS", "Number of Mixed Events",

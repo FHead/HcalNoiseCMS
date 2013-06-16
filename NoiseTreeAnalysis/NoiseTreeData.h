@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat Mar 16 15:21:55 2013 by ROOT version 5.34/05
-// from TTree HcalNoiseTree/Hcal noise tree version 1,1632
-// found on file: NoiseTree_210.root
+// Sat Jun 15 18:13:11 2013 by ROOT version 5.34/05
+// from TTree HcalNoiseTree/Hcal noise tree version 1,2134
+// found on file: NoiseTree_107.root
 //////////////////////////////////////////////////////////
 
 #ifndef NoiseTreeData_h
@@ -66,6 +66,9 @@ public :
    Double_t        RecHitTime[5184];
    UInt_t          FlagWord[5184];
    UInt_t          AuxWord[5184];
+   Double_t        RespCorrGain[5184];
+   Double_t        fCorr[5184];
+   Double_t        SamplesToAdd[5184];
    Double_t        RBXCharge[72][10];
    Double_t        RBXEnergy[72];
    Double_t        RBXCharge15[72][10];
@@ -89,6 +92,18 @@ public :
    Int_t           JetCount30;
    Int_t           JetCount50;
    Int_t           JetCount100;
+   Double_t        HOMaxEnergyRing0;
+   Double_t        HOSecondMaxEnergyRing0;
+   Int_t           HOMaxEnergyIDRing0;
+   Int_t           HOSecondMaxEnergyIDRing0;
+   Int_t           HOHitCount100Ring0;
+   Int_t           HOHitCount150Ring0;
+   Double_t        HOMaxEnergyRing12;
+   Double_t        HOSecondMaxEnergyRing12;
+   Int_t           HOMaxEnergyIDRing12;
+   Int_t           HOSecondMaxEnergyIDRing12;
+   Int_t           HOHitCount100Ring12;
+   Int_t           HOHitCount150Ring12;
    Bool_t          OfficialDecision;
 
    // List of branches
@@ -136,6 +151,9 @@ public :
    TBranch        *b_RecHitTime;   //!
    TBranch        *b_FlagWord;   //!
    TBranch        *b_AuxWord;   //!
+   TBranch        *b_RespCorrGain;   //!
+   TBranch        *b_fCorr;   //!
+   TBranch        *b_SamplesToAdd;   //!
    TBranch        *b_RBXCharge;   //!
    TBranch        *b_RBXEnergy;   //!
    TBranch        *b_RBXCharge15;   //!
@@ -159,6 +177,18 @@ public :
    TBranch        *b_JetCount30;   //!
    TBranch        *b_JetCount50;   //!
    TBranch        *b_JetCount100;   //!
+   TBranch        *b_HOMaxEnergyRing0;   //!
+   TBranch        *b_HOSecondMaxEnergyRing0;   //!
+   TBranch        *b_HOMaxEnergyIDRing0;   //!
+   TBranch        *b_HOSecondMaxEnergyIDRing0;   //!
+   TBranch        *b_HOHitCount100Ring0;   //!
+   TBranch        *b_HOHitCount150Ring0;   //!
+   TBranch        *b_HOMaxEnergyRing12;   //!
+   TBranch        *b_HOSecondMaxEnergyRing12;   //!
+   TBranch        *b_HOMaxEnergyIDRing12;   //!
+   TBranch        *b_HOSecondMaxEnergyIDRing12;   //!
+   TBranch        *b_HOHitCount100Ring12;   //!
+   TBranch        *b_HOHitCount150Ring12;   //!
    TBranch        *b_OfficialDecision;   //!
 
    NoiseTreeData(TTree *tree=0);
@@ -180,11 +210,11 @@ NoiseTreeData::NoiseTreeData(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("NoiseTree_210.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("NoiseTree_107.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("NoiseTree_210.root");
+         f = new TFile("NoiseTree_107.root");
       }
-      TDirectory * dir = (TDirectory*)f->Get("NoiseTree_210.root:/ExportTree");
+      TDirectory * dir = (TDirectory*)f->Get("NoiseTree_107.root:/ExportTree");
       dir->GetObject("HcalNoiseTree",tree);
 
    }
@@ -276,6 +306,9 @@ void NoiseTreeData::Init(TTree *tree)
    fChain->SetBranchAddress("RecHitTime", RecHitTime, &b_RecHitTime);
    fChain->SetBranchAddress("FlagWord", FlagWord, &b_FlagWord);
    fChain->SetBranchAddress("AuxWord", AuxWord, &b_AuxWord);
+   fChain->SetBranchAddress("RespCorrGain", RespCorrGain, &b_RespCorrGain);
+   fChain->SetBranchAddress("fCorr", fCorr, &b_fCorr);
+   fChain->SetBranchAddress("SamplesToAdd", SamplesToAdd, &b_SamplesToAdd);
    fChain->SetBranchAddress("RBXCharge", RBXCharge, &b_RBXCharge);
    fChain->SetBranchAddress("RBXEnergy", RBXEnergy, &b_RBXEnergy);
    fChain->SetBranchAddress("RBXCharge15", RBXCharge15, &b_RBXCharge15);
@@ -299,6 +332,18 @@ void NoiseTreeData::Init(TTree *tree)
    fChain->SetBranchAddress("JetCount30", &JetCount30, &b_JetCount30);
    fChain->SetBranchAddress("JetCount50", &JetCount50, &b_JetCount50);
    fChain->SetBranchAddress("JetCount100", &JetCount100, &b_JetCount100);
+   fChain->SetBranchAddress("HOMaxEnergyRing0", &HOMaxEnergyRing0, &b_HOMaxEnergyRing0);
+   fChain->SetBranchAddress("HOSecondMaxEnergyRing0", &HOSecondMaxEnergyRing0, &b_HOSecondMaxEnergyRing0);
+   fChain->SetBranchAddress("HOMaxEnergyIDRing0", &HOMaxEnergyIDRing0, &b_HOMaxEnergyIDRing0);
+   fChain->SetBranchAddress("HOSecondMaxEnergyIDRing0", &HOSecondMaxEnergyIDRing0, &b_HOSecondMaxEnergyIDRing0);
+   fChain->SetBranchAddress("HOHitCount100Ring0", &HOHitCount100Ring0, &b_HOHitCount100Ring0);
+   fChain->SetBranchAddress("HOHitCount150Ring0", &HOHitCount150Ring0, &b_HOHitCount150Ring0);
+   fChain->SetBranchAddress("HOMaxEnergyRing12", &HOMaxEnergyRing12, &b_HOMaxEnergyRing12);
+   fChain->SetBranchAddress("HOSecondMaxEnergyRing12", &HOSecondMaxEnergyRing12, &b_HOSecondMaxEnergyRing12);
+   fChain->SetBranchAddress("HOMaxEnergyIDRing12", &HOMaxEnergyIDRing12, &b_HOMaxEnergyIDRing12);
+   fChain->SetBranchAddress("HOSecondMaxEnergyIDRing12", &HOSecondMaxEnergyIDRing12, &b_HOSecondMaxEnergyIDRing12);
+   fChain->SetBranchAddress("HOHitCount100Ring12", &HOHitCount100Ring12, &b_HOHitCount100Ring12);
+   fChain->SetBranchAddress("HOHitCount150Ring12", &HOHitCount150Ring12, &b_HOHitCount150Ring12);
    fChain->SetBranchAddress("OfficialDecision", &OfficialDecision, &b_OfficialDecision);
    Notify();
 }

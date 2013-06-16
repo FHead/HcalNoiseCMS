@@ -15,10 +15,10 @@
 # Installing "Geners". See http://geners.hepforge.org
 mkdir -p ${HOME}/local/src
 cd ${HOME}/local/src
-wget http://www.hepforge.org/archive/geners/geners-1.2.0.tar.gz
-tar -xzf geners-1.2.0.tar.gz
-rm -f geners-1.2.0.tar.gz
-cd geners-1.2.0
+wget http://www.hepforge.org/archive/geners/geners-1.3.0.tar.gz
+tar -xzf geners-1.3.0.tar.gz
+rm -f geners-1.3.0.tar.gz
+cd geners-1.3.0
 setenv CXXFLAGS -std=c++0x
 ./configure --with-pic --prefix=${HOME}/local
 make
@@ -27,10 +27,10 @@ make check
 
 # Installing "NPStat". See http://npstat.hepforge.org
 cd ${HOME}/local/src
-wget http://www.hepforge.org/archive/npstat/npstat-1.3.0.tar.gz
-tar -xzf npstat-1.3.0.tar.gz
-rm -f npstat-1.3.0.tar.gz
-cd npstat-1.3.0
+wget http://www.hepforge.org/archive/npstat/npstat-2.0.0.tar.gz
+tar -xzf npstat-2.0.0.tar.gz
+rm -f npstat-2.0.0.tar.gz
+cd npstat-2.0.0
 setenv CXXFLAGS -std=c++0x
 setenv PKG_CONFIG_PATH ${HOME}/local/lib/pkgconfig
 ./configure --with-pic --prefix=${HOME}/local
@@ -45,7 +45,7 @@ make install
 # the CMSSW installation.
 #
 # To make sure things work as expected, you will need to edit the
-# Makefile in the ${HOME}/local/src/npstat-1.3.0/examples/C++ directory
+# Makefile in the ${HOME}/local/src/npstat-2.0.0/examples/C++ directory
 # and manually change the "FLIBS" variable so that it looks something
 # like "FLIBS = -lgfortran -lm", without any search path specified.
 # 

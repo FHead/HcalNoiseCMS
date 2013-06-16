@@ -2025,6 +2025,42 @@ class AbsArchive(_object):
 AbsArchive_swigregister = _npstat.AbsArchive_swigregister
 AbsArchive_swigregister(AbsArchive)
 
+class BinaryArchiveBase(AbsArchive):
+    __swig_setmethods__ = {}
+    for _s in [AbsArchive]: __swig_setmethods__.update(getattr(_s,'__swig_setmethods__',{}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, BinaryArchiveBase, name, value)
+    __swig_getmethods__ = {}
+    for _s in [AbsArchive]: __swig_getmethods__.update(getattr(_s,'__swig_getmethods__',{}))
+    __getattr__ = lambda self, name: _swig_getattr(self, BinaryArchiveBase, name)
+    def __init__(self, *args, **kwargs): raise AttributeError("No constructor defined - class is abstract")
+    __repr__ = _swig_repr
+    __swig_destroy__ = _npstat.delete_BinaryArchiveBase
+    __del__ = lambda self : None;
+    def isOpen(self): return _npstat.BinaryArchiveBase_isOpen(self)
+    def isReadable(self): return _npstat.BinaryArchiveBase_isReadable(self)
+    def isWritable(self): return _npstat.BinaryArchiveBase_isWritable(self)
+    def error(self): return _npstat.BinaryArchiveBase_error(self)
+    def modeValid(self): return _npstat.BinaryArchiveBase_modeValid(self)
+    def size(self): return _npstat.BinaryArchiveBase_size(self)
+    def smallestId(self): return _npstat.BinaryArchiveBase_smallestId(self)
+    def largestId(self): return _npstat.BinaryArchiveBase_largestId(self)
+    def idsAreContiguous(self): return _npstat.BinaryArchiveBase_idsAreContiguous(self)
+    def itemExists(self, *args): return _npstat.BinaryArchiveBase_itemExists(self, *args)
+    def itemSearch(self, *args): return _npstat.BinaryArchiveBase_itemSearch(self, *args)
+    def compressionBufferSize(self): return _npstat.BinaryArchiveBase_compressionBufferSize(self)
+    def compressionLevel(self): return _npstat.BinaryArchiveBase_compressionLevel(self)
+    def minSizeToCompress(self): return _npstat.BinaryArchiveBase_minSizeToCompress(self)
+    def injectMetadata(self): return _npstat.BinaryArchiveBase_injectMetadata(self)
+    __swig_getmethods__["isEmptyFile"] = lambda x: _npstat.BinaryArchiveBase_isEmptyFile
+    if _newclass:isEmptyFile = staticmethod(_npstat.BinaryArchiveBase_isEmptyFile)
+    def compression(self): return _npstat.BinaryArchiveBase_compression(self)
+BinaryArchiveBase_swigregister = _npstat.BinaryArchiveBase_swigregister
+BinaryArchiveBase_swigregister(BinaryArchiveBase)
+
+def BinaryArchiveBase_isEmptyFile(*args):
+  return _npstat.BinaryArchiveBase_isEmptyFile(*args)
+BinaryArchiveBase_isEmptyFile = _npstat.BinaryArchiveBase_isEmptyFile
+
 class StringArchive(AbsArchive):
     __swig_setmethods__ = {}
     for _s in [AbsArchive]: __swig_setmethods__.update(getattr(_s,'__swig_setmethods__',{}))
@@ -2124,60 +2160,6 @@ readCompressedStringArchiveExt = _npstat.readCompressedStringArchiveExt
 def loadStringArchiveFromArchive(*args):
   return _npstat.loadStringArchiveFromArchive(*args)
 loadStringArchiveFromArchive = _npstat.loadStringArchiveFromArchive
-class BinaryArchiveBase(AbsArchive):
-    __swig_setmethods__ = {}
-    for _s in [AbsArchive]: __swig_setmethods__.update(getattr(_s,'__swig_setmethods__',{}))
-    __setattr__ = lambda self, name, value: _swig_setattr(self, BinaryArchiveBase, name, value)
-    __swig_getmethods__ = {}
-    for _s in [AbsArchive]: __swig_getmethods__.update(getattr(_s,'__swig_getmethods__',{}))
-    __getattr__ = lambda self, name: _swig_getattr(self, BinaryArchiveBase, name)
-    def __init__(self, *args, **kwargs): raise AttributeError("No constructor defined - class is abstract")
-    __repr__ = _swig_repr
-    __swig_destroy__ = _npstat.delete_BinaryArchiveBase
-    __del__ = lambda self : None;
-    def isOpen(self): return _npstat.BinaryArchiveBase_isOpen(self)
-    def isReadable(self): return _npstat.BinaryArchiveBase_isReadable(self)
-    def isWritable(self): return _npstat.BinaryArchiveBase_isWritable(self)
-    def error(self): return _npstat.BinaryArchiveBase_error(self)
-    def modeValid(self): return _npstat.BinaryArchiveBase_modeValid(self)
-    def size(self): return _npstat.BinaryArchiveBase_size(self)
-    def smallestId(self): return _npstat.BinaryArchiveBase_smallestId(self)
-    def largestId(self): return _npstat.BinaryArchiveBase_largestId(self)
-    def idsAreContiguous(self): return _npstat.BinaryArchiveBase_idsAreContiguous(self)
-    def itemExists(self, *args): return _npstat.BinaryArchiveBase_itemExists(self, *args)
-    def itemSearch(self, *args): return _npstat.BinaryArchiveBase_itemSearch(self, *args)
-    def compressionBufferSize(self): return _npstat.BinaryArchiveBase_compressionBufferSize(self)
-    def compressionLevel(self): return _npstat.BinaryArchiveBase_compressionLevel(self)
-    def minSizeToCompress(self): return _npstat.BinaryArchiveBase_minSizeToCompress(self)
-    def injectMetadata(self): return _npstat.BinaryArchiveBase_injectMetadata(self)
-    __swig_getmethods__["isEmptyFile"] = lambda x: _npstat.BinaryArchiveBase_isEmptyFile
-    if _newclass:isEmptyFile = staticmethod(_npstat.BinaryArchiveBase_isEmptyFile)
-    def compression(self): return _npstat.BinaryArchiveBase_compression(self)
-BinaryArchiveBase_swigregister = _npstat.BinaryArchiveBase_swigregister
-BinaryArchiveBase_swigregister(BinaryArchiveBase)
-
-def BinaryArchiveBase_isEmptyFile(*args):
-  return _npstat.BinaryArchiveBase_isEmptyFile(*args)
-BinaryArchiveBase_isEmptyFile = _npstat.BinaryArchiveBase_isEmptyFile
-
-class BinaryFileArchive(BinaryArchiveBase):
-    __swig_setmethods__ = {}
-    for _s in [BinaryArchiveBase]: __swig_setmethods__.update(getattr(_s,'__swig_setmethods__',{}))
-    __setattr__ = lambda self, name, value: _swig_setattr(self, BinaryFileArchive, name, value)
-    __swig_getmethods__ = {}
-    for _s in [BinaryArchiveBase]: __swig_getmethods__.update(getattr(_s,'__swig_getmethods__',{}))
-    __getattr__ = lambda self, name: _swig_getattr(self, BinaryFileArchive, name)
-    __repr__ = _swig_repr
-    def __init__(self, *args): 
-        this = _npstat.new_BinaryFileArchive(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _npstat.delete_BinaryFileArchive
-    __del__ = lambda self : None;
-    def flush(self): return _npstat.BinaryFileArchive_flush(self)
-BinaryFileArchive_swigregister = _npstat.BinaryFileArchive_swigregister
-BinaryFileArchive_swigregister(BinaryFileArchive)
-
 class ArchiveValueRecord_Bool(AbsRecord):
     __swig_setmethods__ = {}
     for _s in [AbsRecord]: __swig_setmethods__.update(getattr(_s,'__swig_setmethods__',{}))
@@ -2956,6 +2938,24 @@ class Ref_String(AbsReference):
     __del__ = lambda self : None;
 Ref_String_swigregister = _npstat.Ref_String_swigregister
 Ref_String_swigregister(Ref_String)
+
+class BinaryFileArchive(BinaryArchiveBase):
+    __swig_setmethods__ = {}
+    for _s in [BinaryArchiveBase]: __swig_setmethods__.update(getattr(_s,'__swig_setmethods__',{}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, BinaryFileArchive, name, value)
+    __swig_getmethods__ = {}
+    for _s in [BinaryArchiveBase]: __swig_getmethods__.update(getattr(_s,'__swig_getmethods__',{}))
+    __getattr__ = lambda self, name: _swig_getattr(self, BinaryFileArchive, name)
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _npstat.new_BinaryFileArchive(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _npstat.delete_BinaryFileArchive
+    __del__ = lambda self : None;
+    def flush(self): return _npstat.BinaryFileArchive_flush(self)
+BinaryFileArchive_swigregister = _npstat.BinaryFileArchive_swigregister
+BinaryFileArchive_swigregister(BinaryFileArchive)
 
 class MultiFileArchive(BinaryArchiveBase):
     __swig_setmethods__ = {}

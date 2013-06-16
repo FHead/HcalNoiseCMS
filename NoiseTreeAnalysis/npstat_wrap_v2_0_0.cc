@@ -7930,19 +7930,16 @@ SWIGINTERN gs::CatalogEntry gs_AbsArchive_getCatalogEntry(gs::AbsArchive *self,u
              return *p;
          }
 
-#include "geners/StringArchive.hh"
-
-
-#include "npstat/wrap/stringArchiveIO.hh"
-
-
 #include "geners/BinaryArchiveBase.hh"
 
 SWIGINTERN int gs_BinaryArchiveBase_compression(gs::BinaryArchiveBase const *self){
              return static_cast<int>(self->compressionMode());
          }
 
-#include "geners/BinaryFileArchive.hh"
+#include "geners/StringArchive.hh"
+
+
+#include "geners/stringArchiveIO.hh"
 
 
 #include <complex>
@@ -8102,6 +8099,9 @@ SWIGINTERN std::string gs_Reference_Sl_std_string_Sg__getValue(gs::Reference< st
             CPP11_auto_ptr<std::string > ptr = self->get(index);
             return *ptr;
         }
+
+#include "geners/BinaryFileArchive.hh"
+
 
 #include "geners/MultiFileArchive.hh"
 
@@ -69977,6 +69977,560 @@ SWIGINTERN PyObject *AbsArchive_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_delete_BinaryArchiveBase(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_BinaryArchiveBase",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_BinaryArchiveBase" "', argument " "1"" of type '" "gs::BinaryArchiveBase *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      delete arg1;
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_isOpen(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_isOpen",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_isOpen" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (bool)((gs::BinaryArchiveBase const *)arg1)->isOpen();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_isReadable(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_isReadable",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_isReadable" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (bool)((gs::BinaryArchiveBase const *)arg1)->isReadable();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_isWritable(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_isWritable",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_isWritable" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (bool)((gs::BinaryArchiveBase const *)arg1)->isWritable();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_error(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::string result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_error",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_error" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = ((gs::BinaryArchiveBase const *)arg1)->error();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_modeValid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_modeValid",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_modeValid" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (bool)((gs::BinaryArchiveBase const *)arg1)->modeValid();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_size(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  unsigned long long result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_size",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_size" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (unsigned long long)((gs::BinaryArchiveBase const *)arg1)->size();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_unsigned_SS_long_SS_long(static_cast< unsigned long long >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_smallestId(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  unsigned long long result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_smallestId",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_smallestId" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (unsigned long long)((gs::BinaryArchiveBase const *)arg1)->smallestId();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_unsigned_SS_long_SS_long(static_cast< unsigned long long >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_largestId(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  unsigned long long result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_largestId",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_largestId" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (unsigned long long)((gs::BinaryArchiveBase const *)arg1)->largestId();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_unsigned_SS_long_SS_long(static_cast< unsigned long long >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_idsAreContiguous(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_idsAreContiguous",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_idsAreContiguous" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (bool)((gs::BinaryArchiveBase const *)arg1)->idsAreContiguous();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_itemExists(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  unsigned long long arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned long long val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:BinaryArchiveBase_itemExists",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_itemExists" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  ecode2 = SWIG_AsVal_unsigned_SS_long_SS_long(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "BinaryArchiveBase_itemExists" "', argument " "2"" of type '" "unsigned long long""'");
+  } 
+  arg2 = static_cast< unsigned long long >(val2);
+  {
+    try {
+      result = (bool)((gs::BinaryArchiveBase const *)arg1)->itemExists(arg2);
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_itemSearch(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  gs::SearchSpecifier *arg2 = 0 ;
+  gs::SearchSpecifier *arg3 = 0 ;
+  std::vector< unsigned long long,std::allocator< unsigned long long > > *arg4 = (std::vector< unsigned long long,std::allocator< unsigned long long > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:BinaryArchiveBase_itemSearch",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_itemSearch" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_gs__SearchSpecifier,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "BinaryArchiveBase_itemSearch" "', argument " "2"" of type '" "gs::SearchSpecifier const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "BinaryArchiveBase_itemSearch" "', argument " "2"" of type '" "gs::SearchSpecifier const &""'"); 
+  }
+  arg2 = reinterpret_cast< gs::SearchSpecifier * >(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_gs__SearchSpecifier,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "BinaryArchiveBase_itemSearch" "', argument " "3"" of type '" "gs::SearchSpecifier const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "BinaryArchiveBase_itemSearch" "', argument " "3"" of type '" "gs::SearchSpecifier const &""'"); 
+  }
+  arg3 = reinterpret_cast< gs::SearchSpecifier * >(argp3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_std__vectorT_unsigned_long_long_std__allocatorT_unsigned_long_long_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "BinaryArchiveBase_itemSearch" "', argument " "4"" of type '" "std::vector< unsigned long long,std::allocator< unsigned long long > > *""'"); 
+  }
+  arg4 = reinterpret_cast< std::vector< unsigned long long,std::allocator< unsigned long long > > * >(argp4);
+  {
+    try {
+      ((gs::BinaryArchiveBase const *)arg1)->itemSearch((gs::SearchSpecifier const &)*arg2,(gs::SearchSpecifier const &)*arg3,arg4);
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_compressionBufferSize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::size_t result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_compressionBufferSize",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_compressionBufferSize" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = ((gs::BinaryArchiveBase const *)arg1)->compressionBufferSize();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_size_t(static_cast< size_t >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_compressionLevel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_compressionLevel",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_compressionLevel" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (int)((gs::BinaryArchiveBase const *)arg1)->compressionLevel();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_minSizeToCompress(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  unsigned int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_minSizeToCompress",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_minSizeToCompress" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (unsigned int)((gs::BinaryArchiveBase const *)arg1)->minSizeToCompress();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_injectMetadata(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_injectMetadata",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_injectMetadata" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (bool)((gs::BinaryArchiveBase const *)arg1)->injectMetadata();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_isEmptyFile(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::fstream *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_isEmptyFile",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_std__fstream,  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_isEmptyFile" "', argument " "1"" of type '" "std::fstream &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "BinaryArchiveBase_isEmptyFile" "', argument " "1"" of type '" "std::fstream &""'"); 
+  }
+  arg1 = reinterpret_cast< std::fstream * >(argp1);
+  {
+    try {
+      result = (bool)gs::BinaryArchiveBase::isEmptyFile(*arg1);
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryArchiveBase_compression(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_compression",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_compression" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
+  {
+    try {
+      result = (int)gs_BinaryArchiveBase_compression((gs::BinaryArchiveBase const *)arg1);
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *BinaryArchiveBase_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_gs__BinaryArchiveBase, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 SWIGINTERN PyObject *_wrap_new_StringArchive__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
@@ -70904,7 +71458,7 @@ SWIGINTERN PyObject *_wrap_writeStringArchive(PyObject *SWIGUNUSEDPARM(self), Py
   arg2 = reinterpret_cast< char * >(buf2);
   {
     try {
-      result = (bool)npstat::writeStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2);
+      result = (bool)gs::writeStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -70935,7 +71489,7 @@ SWIGINTERN PyObject *_wrap_readStringArchive(PyObject *SWIGUNUSEDPARM(self), PyO
   arg1 = reinterpret_cast< char * >(buf1);
   {
     try {
-      result = (gs::StringArchive *)npstat::readStringArchive((char const *)arg1);
+      result = (gs::StringArchive *)gs::readStringArchive((char const *)arg1);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71014,7 +71568,7 @@ SWIGINTERN PyObject *_wrap_writeCompressedStringArchive__SWIG_0(PyObject *SWIGUN
   arg6 = static_cast< unsigned int >(val6);
   {
     try {
-      result = (bool)npstat::writeCompressedStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2,arg3,arg4,arg5,arg6);
+      result = (bool)gs::writeCompressedStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2,arg3,arg4,arg5,arg6);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71084,7 +71638,7 @@ SWIGINTERN PyObject *_wrap_writeCompressedStringArchive__SWIG_1(PyObject *SWIGUN
   arg5 = static_cast< unsigned int >(val5);
   {
     try {
-      result = (bool)npstat::writeCompressedStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2,arg3,arg4,arg5);
+      result = (bool)gs::writeCompressedStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2,arg3,arg4,arg5);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71145,7 +71699,7 @@ SWIGINTERN PyObject *_wrap_writeCompressedStringArchive__SWIG_2(PyObject *SWIGUN
   arg4 = static_cast< int >(val4);
   {
     try {
-      result = (bool)npstat::writeCompressedStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2,arg3,arg4);
+      result = (bool)gs::writeCompressedStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2,arg3,arg4);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71197,7 +71751,7 @@ SWIGINTERN PyObject *_wrap_writeCompressedStringArchive__SWIG_3(PyObject *SWIGUN
   arg3 = static_cast< unsigned int >(val3);
   {
     try {
-      result = (bool)npstat::writeCompressedStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2,arg3);
+      result = (bool)gs::writeCompressedStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2,arg3);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71240,7 +71794,7 @@ SWIGINTERN PyObject *_wrap_writeCompressedStringArchive__SWIG_4(PyObject *SWIGUN
   arg2 = reinterpret_cast< char * >(buf2);
   {
     try {
-      result = (bool)npstat::writeCompressedStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2);
+      result = (bool)gs::writeCompressedStringArchive((gs::StringArchive const &)*arg1,(char const *)arg2);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71388,11 +71942,11 @@ SWIGINTERN PyObject *_wrap_writeCompressedStringArchive(PyObject *self, PyObject
 fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'writeCompressedStringArchive'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    npstat::writeCompressedStringArchive(gs::StringArchive const &,char const *,unsigned int,int,unsigned int,unsigned int)\n"
-    "    npstat::writeCompressedStringArchive(gs::StringArchive const &,char const *,unsigned int,int,unsigned int)\n"
-    "    npstat::writeCompressedStringArchive(gs::StringArchive const &,char const *,unsigned int,int)\n"
-    "    npstat::writeCompressedStringArchive(gs::StringArchive const &,char const *,unsigned int)\n"
-    "    npstat::writeCompressedStringArchive(gs::StringArchive const &,char const *)\n");
+    "    gs::writeCompressedStringArchive(gs::StringArchive const &,char const *,unsigned int,int,unsigned int,unsigned int)\n"
+    "    gs::writeCompressedStringArchive(gs::StringArchive const &,char const *,unsigned int,int,unsigned int)\n"
+    "    gs::writeCompressedStringArchive(gs::StringArchive const &,char const *,unsigned int,int)\n"
+    "    gs::writeCompressedStringArchive(gs::StringArchive const &,char const *,unsigned int)\n"
+    "    gs::writeCompressedStringArchive(gs::StringArchive const &,char const *)\n");
   return 0;
 }
 
@@ -71414,7 +71968,7 @@ SWIGINTERN PyObject *_wrap_readCompressedStringArchive(PyObject *SWIGUNUSEDPARM(
   arg1 = reinterpret_cast< char * >(buf1);
   {
     try {
-      result = (gs::StringArchive *)npstat::readCompressedStringArchive((char const *)arg1);
+      result = (gs::StringArchive *)gs::readCompressedStringArchive((char const *)arg1);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71467,7 +72021,7 @@ SWIGINTERN PyObject *_wrap_writeCompressedStringArchiveExt__SWIG_0(PyObject *SWI
   arg3 = reinterpret_cast< char * >(buf3);
   {
     try {
-      result = (bool)npstat::writeCompressedStringArchiveExt((gs::StringArchive const &)*arg1,(char const *)arg2,(char const *)arg3);
+      result = (bool)gs::writeCompressedStringArchiveExt((gs::StringArchive const &)*arg1,(char const *)arg2,(char const *)arg3);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71512,7 +72066,7 @@ SWIGINTERN PyObject *_wrap_writeCompressedStringArchiveExt__SWIG_1(PyObject *SWI
   arg2 = reinterpret_cast< char * >(buf2);
   {
     try {
-      result = (bool)npstat::writeCompressedStringArchiveExt((gs::StringArchive const &)*arg1,(char const *)arg2);
+      result = (bool)gs::writeCompressedStringArchiveExt((gs::StringArchive const &)*arg1,(char const *)arg2);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71568,8 +72122,8 @@ SWIGINTERN PyObject *_wrap_writeCompressedStringArchiveExt(PyObject *self, PyObj
 fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'writeCompressedStringArchiveExt'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    npstat::writeCompressedStringArchiveExt(gs::StringArchive const &,char const *,char const *)\n"
-    "    npstat::writeCompressedStringArchiveExt(gs::StringArchive const &,char const *)\n");
+    "    gs::writeCompressedStringArchiveExt(gs::StringArchive const &,char const *,char const *)\n"
+    "    gs::writeCompressedStringArchiveExt(gs::StringArchive const &,char const *)\n");
   return 0;
 }
 
@@ -71601,7 +72155,7 @@ SWIGINTERN PyObject *_wrap_readCompressedStringArchiveExt__SWIG_0(PyObject *SWIG
   arg2 = reinterpret_cast< char * >(buf2);
   {
     try {
-      result = (gs::StringArchive *)npstat::readCompressedStringArchiveExt((char const *)arg1,(char const *)arg2);
+      result = (gs::StringArchive *)gs::readCompressedStringArchiveExt((char const *)arg1,(char const *)arg2);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71634,7 +72188,7 @@ SWIGINTERN PyObject *_wrap_readCompressedStringArchiveExt__SWIG_1(PyObject *SWIG
   arg1 = reinterpret_cast< char * >(buf1);
   {
     try {
-      result = (gs::StringArchive *)npstat::readCompressedStringArchiveExt((char const *)arg1);
+      result = (gs::StringArchive *)gs::readCompressedStringArchiveExt((char const *)arg1);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71682,8 +72236,8 @@ SWIGINTERN PyObject *_wrap_readCompressedStringArchiveExt(PyObject *self, PyObje
 fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'readCompressedStringArchiveExt'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    npstat::readCompressedStringArchiveExt(char const *,char const *)\n"
-    "    npstat::readCompressedStringArchiveExt(char const *)\n");
+    "    gs::readCompressedStringArchiveExt(char const *,char const *)\n"
+    "    gs::readCompressedStringArchiveExt(char const *)\n");
   return 0;
 }
 
@@ -71716,7 +72270,7 @@ SWIGINTERN PyObject *_wrap_loadStringArchiveFromArchive(PyObject *SWIGUNUSEDPARM
   arg2 = static_cast< unsigned long long >(val2);
   {
     try {
-      result = (gs::StringArchive *)npstat::loadStringArchiveFromArchive(*arg1,arg2);
+      result = (gs::StringArchive *)gs::loadStringArchiveFromArchive(*arg1,arg2);
     } catch (const std::exception& e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     }
@@ -71727,956 +72281,6 @@ fail:
   return NULL;
 }
 
-
-SWIGINTERN PyObject *_wrap_delete_BinaryArchiveBase(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_BinaryArchiveBase",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_BinaryArchiveBase" "', argument " "1"" of type '" "gs::BinaryArchiveBase *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      delete arg1;
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_isOpen(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_isOpen",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_isOpen" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (bool)((gs::BinaryArchiveBase const *)arg1)->isOpen();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_isReadable(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_isReadable",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_isReadable" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (bool)((gs::BinaryArchiveBase const *)arg1)->isReadable();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_isWritable(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_isWritable",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_isWritable" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (bool)((gs::BinaryArchiveBase const *)arg1)->isWritable();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_error(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::string result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_error",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_error" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = ((gs::BinaryArchiveBase const *)arg1)->error();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_modeValid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_modeValid",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_modeValid" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (bool)((gs::BinaryArchiveBase const *)arg1)->modeValid();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_size(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  unsigned long long result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_size",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_size" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (unsigned long long)((gs::BinaryArchiveBase const *)arg1)->size();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_unsigned_SS_long_SS_long(static_cast< unsigned long long >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_smallestId(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  unsigned long long result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_smallestId",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_smallestId" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (unsigned long long)((gs::BinaryArchiveBase const *)arg1)->smallestId();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_unsigned_SS_long_SS_long(static_cast< unsigned long long >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_largestId(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  unsigned long long result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_largestId",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_largestId" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (unsigned long long)((gs::BinaryArchiveBase const *)arg1)->largestId();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_unsigned_SS_long_SS_long(static_cast< unsigned long long >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_idsAreContiguous(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_idsAreContiguous",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_idsAreContiguous" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (bool)((gs::BinaryArchiveBase const *)arg1)->idsAreContiguous();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_itemExists(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  unsigned long long arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned long long val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:BinaryArchiveBase_itemExists",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_itemExists" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  ecode2 = SWIG_AsVal_unsigned_SS_long_SS_long(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "BinaryArchiveBase_itemExists" "', argument " "2"" of type '" "unsigned long long""'");
-  } 
-  arg2 = static_cast< unsigned long long >(val2);
-  {
-    try {
-      result = (bool)((gs::BinaryArchiveBase const *)arg1)->itemExists(arg2);
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_itemSearch(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  gs::SearchSpecifier *arg2 = 0 ;
-  gs::SearchSpecifier *arg3 = 0 ;
-  std::vector< unsigned long long,std::allocator< unsigned long long > > *arg4 = (std::vector< unsigned long long,std::allocator< unsigned long long > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:BinaryArchiveBase_itemSearch",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_itemSearch" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_gs__SearchSpecifier,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "BinaryArchiveBase_itemSearch" "', argument " "2"" of type '" "gs::SearchSpecifier const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "BinaryArchiveBase_itemSearch" "', argument " "2"" of type '" "gs::SearchSpecifier const &""'"); 
-  }
-  arg2 = reinterpret_cast< gs::SearchSpecifier * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_gs__SearchSpecifier,  0  | 0);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "BinaryArchiveBase_itemSearch" "', argument " "3"" of type '" "gs::SearchSpecifier const &""'"); 
-  }
-  if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "BinaryArchiveBase_itemSearch" "', argument " "3"" of type '" "gs::SearchSpecifier const &""'"); 
-  }
-  arg3 = reinterpret_cast< gs::SearchSpecifier * >(argp3);
-  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_std__vectorT_unsigned_long_long_std__allocatorT_unsigned_long_long_t_t, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "BinaryArchiveBase_itemSearch" "', argument " "4"" of type '" "std::vector< unsigned long long,std::allocator< unsigned long long > > *""'"); 
-  }
-  arg4 = reinterpret_cast< std::vector< unsigned long long,std::allocator< unsigned long long > > * >(argp4);
-  {
-    try {
-      ((gs::BinaryArchiveBase const *)arg1)->itemSearch((gs::SearchSpecifier const &)*arg2,(gs::SearchSpecifier const &)*arg3,arg4);
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_compressionBufferSize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::size_t result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_compressionBufferSize",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_compressionBufferSize" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = ((gs::BinaryArchiveBase const *)arg1)->compressionBufferSize();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_size_t(static_cast< size_t >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_compressionLevel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_compressionLevel",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_compressionLevel" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (int)((gs::BinaryArchiveBase const *)arg1)->compressionLevel();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_minSizeToCompress(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  unsigned int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_minSizeToCompress",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_minSizeToCompress" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (unsigned int)((gs::BinaryArchiveBase const *)arg1)->minSizeToCompress();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_injectMetadata(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_injectMetadata",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_injectMetadata" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (bool)((gs::BinaryArchiveBase const *)arg1)->injectMetadata();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_isEmptyFile(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  std::fstream *arg1 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  bool result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_isEmptyFile",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_std__fstream,  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_isEmptyFile" "', argument " "1"" of type '" "std::fstream &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "BinaryArchiveBase_isEmptyFile" "', argument " "1"" of type '" "std::fstream &""'"); 
-  }
-  arg1 = reinterpret_cast< std::fstream * >(argp1);
-  {
-    try {
-      result = (bool)gs::BinaryArchiveBase::isEmptyFile(*arg1);
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryArchiveBase_compression(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryArchiveBase *arg1 = (gs::BinaryArchiveBase *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryArchiveBase_compression",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryArchiveBase, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryArchiveBase_compression" "', argument " "1"" of type '" "gs::BinaryArchiveBase const *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryArchiveBase * >(argp1);
-  {
-    try {
-      result = (int)gs_BinaryArchiveBase_compression((gs::BinaryArchiveBase const *)arg1);
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *BinaryArchiveBase_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_gs__BinaryArchiveBase, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
-SWIGINTERN PyObject *_wrap_new_BinaryFileArchive__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  char *arg1 = (char *) 0 ;
-  char *arg2 = (char *) 0 ;
-  char *arg3 = (char *) 0 ;
-  unsigned int arg4 ;
-  unsigned int arg5 ;
-  int res1 ;
-  char *buf1 = 0 ;
-  int alloc1 = 0 ;
-  int res2 ;
-  char *buf2 = 0 ;
-  int alloc2 = 0 ;
-  int res3 ;
-  char *buf3 = 0 ;
-  int alloc3 = 0 ;
-  unsigned int val4 ;
-  int ecode4 = 0 ;
-  unsigned int val5 ;
-  int ecode5 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  PyObject * obj4 = 0 ;
-  gs::BinaryFileArchive *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOOO:new_BinaryFileArchive",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
-  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_BinaryFileArchive" "', argument " "1"" of type '" "char const *""'");
-  }
-  arg1 = reinterpret_cast< char * >(buf1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_BinaryFileArchive" "', argument " "2"" of type '" "char const *""'");
-  }
-  arg2 = reinterpret_cast< char * >(buf2);
-  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_BinaryFileArchive" "', argument " "3"" of type '" "char const *""'");
-  }
-  arg3 = reinterpret_cast< char * >(buf3);
-  ecode4 = SWIG_AsVal_unsigned_SS_int(obj3, &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "new_BinaryFileArchive" "', argument " "4"" of type '" "unsigned int""'");
-  } 
-  arg4 = static_cast< unsigned int >(val4);
-  ecode5 = SWIG_AsVal_unsigned_SS_int(obj4, &val5);
-  if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "new_BinaryFileArchive" "', argument " "5"" of type '" "unsigned int""'");
-  } 
-  arg5 = static_cast< unsigned int >(val5);
-  {
-    try {
-      result = (gs::BinaryFileArchive *)new gs::BinaryFileArchive((char const *)arg1,(char const *)arg2,(char const *)arg3,arg4,arg5);
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gs__BinaryFileArchive, SWIG_POINTER_NEW |  0 );
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
-  return resultobj;
-fail:
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_BinaryFileArchive__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  char *arg1 = (char *) 0 ;
-  char *arg2 = (char *) 0 ;
-  char *arg3 = (char *) 0 ;
-  unsigned int arg4 ;
-  int res1 ;
-  char *buf1 = 0 ;
-  int alloc1 = 0 ;
-  int res2 ;
-  char *buf2 = 0 ;
-  int alloc2 = 0 ;
-  int res3 ;
-  char *buf3 = 0 ;
-  int alloc3 = 0 ;
-  unsigned int val4 ;
-  int ecode4 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  gs::BinaryFileArchive *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:new_BinaryFileArchive",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
-  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_BinaryFileArchive" "', argument " "1"" of type '" "char const *""'");
-  }
-  arg1 = reinterpret_cast< char * >(buf1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_BinaryFileArchive" "', argument " "2"" of type '" "char const *""'");
-  }
-  arg2 = reinterpret_cast< char * >(buf2);
-  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_BinaryFileArchive" "', argument " "3"" of type '" "char const *""'");
-  }
-  arg3 = reinterpret_cast< char * >(buf3);
-  ecode4 = SWIG_AsVal_unsigned_SS_int(obj3, &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "new_BinaryFileArchive" "', argument " "4"" of type '" "unsigned int""'");
-  } 
-  arg4 = static_cast< unsigned int >(val4);
-  {
-    try {
-      result = (gs::BinaryFileArchive *)new gs::BinaryFileArchive((char const *)arg1,(char const *)arg2,(char const *)arg3,arg4);
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gs__BinaryFileArchive, SWIG_POINTER_NEW |  0 );
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
-  return resultobj;
-fail:
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_BinaryFileArchive__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  char *arg1 = (char *) 0 ;
-  char *arg2 = (char *) 0 ;
-  char *arg3 = (char *) 0 ;
-  int res1 ;
-  char *buf1 = 0 ;
-  int alloc1 = 0 ;
-  int res2 ;
-  char *buf2 = 0 ;
-  int alloc2 = 0 ;
-  int res3 ;
-  char *buf3 = 0 ;
-  int alloc3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  gs::BinaryFileArchive *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:new_BinaryFileArchive",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_BinaryFileArchive" "', argument " "1"" of type '" "char const *""'");
-  }
-  arg1 = reinterpret_cast< char * >(buf1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_BinaryFileArchive" "', argument " "2"" of type '" "char const *""'");
-  }
-  arg2 = reinterpret_cast< char * >(buf2);
-  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_BinaryFileArchive" "', argument " "3"" of type '" "char const *""'");
-  }
-  arg3 = reinterpret_cast< char * >(buf3);
-  {
-    try {
-      result = (gs::BinaryFileArchive *)new gs::BinaryFileArchive((char const *)arg1,(char const *)arg2,(char const *)arg3);
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gs__BinaryFileArchive, SWIG_POINTER_NEW |  0 );
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
-  return resultobj;
-fail:
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_BinaryFileArchive__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  char *arg1 = (char *) 0 ;
-  char *arg2 = (char *) 0 ;
-  int res1 ;
-  char *buf1 = 0 ;
-  int alloc1 = 0 ;
-  int res2 ;
-  char *buf2 = 0 ;
-  int alloc2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  gs::BinaryFileArchive *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:new_BinaryFileArchive",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_BinaryFileArchive" "', argument " "1"" of type '" "char const *""'");
-  }
-  arg1 = reinterpret_cast< char * >(buf1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_BinaryFileArchive" "', argument " "2"" of type '" "char const *""'");
-  }
-  arg2 = reinterpret_cast< char * >(buf2);
-  {
-    try {
-      result = (gs::BinaryFileArchive *)new gs::BinaryFileArchive((char const *)arg1,(char const *)arg2);
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gs__BinaryFileArchive, SWIG_POINTER_NEW |  0 );
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return resultobj;
-fail:
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_BinaryFileArchive(PyObject *self, PyObject *args) {
-  int argc;
-  PyObject *argv[6];
-  int ii;
-  
-  if (!PyTuple_Check(args)) SWIG_fail;
-  argc = args ? (int)PyObject_Length(args) : 0;
-  for (ii = 0; (ii < 5) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
-  }
-  if (argc == 2) {
-    int _v;
-    int res = SWIG_AsCharPtrAndSize(argv[0], 0, NULL, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_new_BinaryFileArchive__SWIG_3(self, args);
-      }
-    }
-  }
-  if (argc == 3) {
-    int _v;
-    int res = SWIG_AsCharPtrAndSize(argv[0], 0, NULL, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          return _wrap_new_BinaryFileArchive__SWIG_2(self, args);
-        }
-      }
-    }
-  }
-  if (argc == 4) {
-    int _v;
-    int res = SWIG_AsCharPtrAndSize(argv[0], 0, NULL, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          {
-            int res = SWIG_AsVal_unsigned_SS_int(argv[3], NULL);
-            _v = SWIG_CheckState(res);
-          }
-          if (_v) {
-            return _wrap_new_BinaryFileArchive__SWIG_1(self, args);
-          }
-        }
-      }
-    }
-  }
-  if (argc == 5) {
-    int _v;
-    int res = SWIG_AsCharPtrAndSize(argv[0], 0, NULL, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          {
-            int res = SWIG_AsVal_unsigned_SS_int(argv[3], NULL);
-            _v = SWIG_CheckState(res);
-          }
-          if (_v) {
-            {
-              int res = SWIG_AsVal_unsigned_SS_int(argv[4], NULL);
-              _v = SWIG_CheckState(res);
-            }
-            if (_v) {
-              return _wrap_new_BinaryFileArchive__SWIG_0(self, args);
-            }
-          }
-        }
-      }
-    }
-  }
-  
-fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_BinaryFileArchive'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    gs::BinaryFileArchive::BinaryFileArchive(char const *,char const *,char const *,unsigned int,unsigned int)\n"
-    "    gs::BinaryFileArchive::BinaryFileArchive(char const *,char const *,char const *,unsigned int)\n"
-    "    gs::BinaryFileArchive::BinaryFileArchive(char const *,char const *,char const *)\n"
-    "    gs::BinaryFileArchive::BinaryFileArchive(char const *,char const *)\n");
-  return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_delete_BinaryFileArchive(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryFileArchive *arg1 = (gs::BinaryFileArchive *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_BinaryFileArchive",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryFileArchive, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_BinaryFileArchive" "', argument " "1"" of type '" "gs::BinaryFileArchive *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryFileArchive * >(argp1);
-  {
-    try {
-      delete arg1;
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_BinaryFileArchive_flush(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  gs::BinaryFileArchive *arg1 = (gs::BinaryFileArchive *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:BinaryFileArchive_flush",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryFileArchive, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryFileArchive_flush" "', argument " "1"" of type '" "gs::BinaryFileArchive *""'"); 
-  }
-  arg1 = reinterpret_cast< gs::BinaryFileArchive * >(argp1);
-  {
-    try {
-      (arg1)->flush();
-    } catch (const std::exception& e) {
-      SWIG_exception(SWIG_RuntimeError, e.what());
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *BinaryFileArchive_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_gs__BinaryFileArchive, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
 
 SWIGINTERN PyObject *_wrap_new_ArchiveValueRecord_Bool(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
@@ -82481,6 +82085,402 @@ SWIGINTERN PyObject *Ref_String_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_new_BinaryFileArchive__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  char *arg1 = (char *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  unsigned int arg4 ;
+  unsigned int arg5 ;
+  int res1 ;
+  char *buf1 = 0 ;
+  int alloc1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  unsigned int val4 ;
+  int ecode4 = 0 ;
+  unsigned int val5 ;
+  int ecode5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  gs::BinaryFileArchive *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:new_BinaryFileArchive",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_BinaryFileArchive" "', argument " "1"" of type '" "char const *""'");
+  }
+  arg1 = reinterpret_cast< char * >(buf1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_BinaryFileArchive" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_BinaryFileArchive" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  ecode4 = SWIG_AsVal_unsigned_SS_int(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "new_BinaryFileArchive" "', argument " "4"" of type '" "unsigned int""'");
+  } 
+  arg4 = static_cast< unsigned int >(val4);
+  ecode5 = SWIG_AsVal_unsigned_SS_int(obj4, &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "new_BinaryFileArchive" "', argument " "5"" of type '" "unsigned int""'");
+  } 
+  arg5 = static_cast< unsigned int >(val5);
+  {
+    try {
+      result = (gs::BinaryFileArchive *)new gs::BinaryFileArchive((char const *)arg1,(char const *)arg2,(char const *)arg3,arg4,arg5);
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gs__BinaryFileArchive, SWIG_POINTER_NEW |  0 );
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return resultobj;
+fail:
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_BinaryFileArchive__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  char *arg1 = (char *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  unsigned int arg4 ;
+  int res1 ;
+  char *buf1 = 0 ;
+  int alloc1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  unsigned int val4 ;
+  int ecode4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  gs::BinaryFileArchive *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:new_BinaryFileArchive",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_BinaryFileArchive" "', argument " "1"" of type '" "char const *""'");
+  }
+  arg1 = reinterpret_cast< char * >(buf1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_BinaryFileArchive" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_BinaryFileArchive" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  ecode4 = SWIG_AsVal_unsigned_SS_int(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "new_BinaryFileArchive" "', argument " "4"" of type '" "unsigned int""'");
+  } 
+  arg4 = static_cast< unsigned int >(val4);
+  {
+    try {
+      result = (gs::BinaryFileArchive *)new gs::BinaryFileArchive((char const *)arg1,(char const *)arg2,(char const *)arg3,arg4);
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gs__BinaryFileArchive, SWIG_POINTER_NEW |  0 );
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return resultobj;
+fail:
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_BinaryFileArchive__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  char *arg1 = (char *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  int res1 ;
+  char *buf1 = 0 ;
+  int alloc1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  gs::BinaryFileArchive *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:new_BinaryFileArchive",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_BinaryFileArchive" "', argument " "1"" of type '" "char const *""'");
+  }
+  arg1 = reinterpret_cast< char * >(buf1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_BinaryFileArchive" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_BinaryFileArchive" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  {
+    try {
+      result = (gs::BinaryFileArchive *)new gs::BinaryFileArchive((char const *)arg1,(char const *)arg2,(char const *)arg3);
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gs__BinaryFileArchive, SWIG_POINTER_NEW |  0 );
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return resultobj;
+fail:
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_BinaryFileArchive__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  char *arg1 = (char *) 0 ;
+  char *arg2 = (char *) 0 ;
+  int res1 ;
+  char *buf1 = 0 ;
+  int alloc1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  gs::BinaryFileArchive *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:new_BinaryFileArchive",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_BinaryFileArchive" "', argument " "1"" of type '" "char const *""'");
+  }
+  arg1 = reinterpret_cast< char * >(buf1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_BinaryFileArchive" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      result = (gs::BinaryFileArchive *)new gs::BinaryFileArchive((char const *)arg1,(char const *)arg2);
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gs__BinaryFileArchive, SWIG_POINTER_NEW |  0 );
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_BinaryFileArchive(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[6];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 5) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_AsCharPtrAndSize(argv[0], 0, NULL, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_new_BinaryFileArchive__SWIG_3(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    int res = SWIG_AsCharPtrAndSize(argv[0], 0, NULL, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_new_BinaryFileArchive__SWIG_2(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    int res = SWIG_AsCharPtrAndSize(argv[0], 0, NULL, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          {
+            int res = SWIG_AsVal_unsigned_SS_int(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_new_BinaryFileArchive__SWIG_1(self, args);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    int res = SWIG_AsCharPtrAndSize(argv[0], 0, NULL, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          {
+            int res = SWIG_AsVal_unsigned_SS_int(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            {
+              int res = SWIG_AsVal_unsigned_SS_int(argv[4], NULL);
+              _v = SWIG_CheckState(res);
+            }
+            if (_v) {
+              return _wrap_new_BinaryFileArchive__SWIG_0(self, args);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_BinaryFileArchive'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    gs::BinaryFileArchive::BinaryFileArchive(char const *,char const *,char const *,unsigned int,unsigned int)\n"
+    "    gs::BinaryFileArchive::BinaryFileArchive(char const *,char const *,char const *,unsigned int)\n"
+    "    gs::BinaryFileArchive::BinaryFileArchive(char const *,char const *,char const *)\n"
+    "    gs::BinaryFileArchive::BinaryFileArchive(char const *,char const *)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_BinaryFileArchive(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryFileArchive *arg1 = (gs::BinaryFileArchive *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_BinaryFileArchive",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryFileArchive, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_BinaryFileArchive" "', argument " "1"" of type '" "gs::BinaryFileArchive *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryFileArchive * >(argp1);
+  {
+    try {
+      delete arg1;
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BinaryFileArchive_flush(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  gs::BinaryFileArchive *arg1 = (gs::BinaryFileArchive *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:BinaryFileArchive_flush",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gs__BinaryFileArchive, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BinaryFileArchive_flush" "', argument " "1"" of type '" "gs::BinaryFileArchive *""'"); 
+  }
+  arg1 = reinterpret_cast< gs::BinaryFileArchive * >(argp1);
+  {
+    try {
+      (arg1)->flush();
+    } catch (const std::exception& e) {
+      SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *BinaryFileArchive_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_gs__BinaryFileArchive, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 SWIGINTERN PyObject *_wrap_new_MultiFileArchive__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
@@ -84035,6 +84035,25 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"AbsArchive_findItems", _wrap_AbsArchive_findItems, METH_VARARGS, NULL},
 	 { (char *)"AbsArchive_getCatalogEntry", _wrap_AbsArchive_getCatalogEntry, METH_VARARGS, NULL},
 	 { (char *)"AbsArchive_swigregister", AbsArchive_swigregister, METH_VARARGS, NULL},
+	 { (char *)"delete_BinaryArchiveBase", _wrap_delete_BinaryArchiveBase, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_isOpen", _wrap_BinaryArchiveBase_isOpen, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_isReadable", _wrap_BinaryArchiveBase_isReadable, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_isWritable", _wrap_BinaryArchiveBase_isWritable, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_error", _wrap_BinaryArchiveBase_error, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_modeValid", _wrap_BinaryArchiveBase_modeValid, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_size", _wrap_BinaryArchiveBase_size, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_smallestId", _wrap_BinaryArchiveBase_smallestId, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_largestId", _wrap_BinaryArchiveBase_largestId, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_idsAreContiguous", _wrap_BinaryArchiveBase_idsAreContiguous, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_itemExists", _wrap_BinaryArchiveBase_itemExists, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_itemSearch", _wrap_BinaryArchiveBase_itemSearch, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_compressionBufferSize", _wrap_BinaryArchiveBase_compressionBufferSize, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_compressionLevel", _wrap_BinaryArchiveBase_compressionLevel, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_minSizeToCompress", _wrap_BinaryArchiveBase_minSizeToCompress, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_injectMetadata", _wrap_BinaryArchiveBase_injectMetadata, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_isEmptyFile", _wrap_BinaryArchiveBase_isEmptyFile, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_compression", _wrap_BinaryArchiveBase_compression, METH_VARARGS, NULL},
+	 { (char *)"BinaryArchiveBase_swigregister", BinaryArchiveBase_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_StringArchive", _wrap_new_StringArchive, METH_VARARGS, NULL},
 	 { (char *)"delete_StringArchive", _wrap_delete_StringArchive, METH_VARARGS, NULL},
 	 { (char *)"StringArchive_isOpen", _wrap_StringArchive_isOpen, METH_VARARGS, NULL},
@@ -84067,29 +84086,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"writeCompressedStringArchiveExt", _wrap_writeCompressedStringArchiveExt, METH_VARARGS, NULL},
 	 { (char *)"readCompressedStringArchiveExt", _wrap_readCompressedStringArchiveExt, METH_VARARGS, NULL},
 	 { (char *)"loadStringArchiveFromArchive", _wrap_loadStringArchiveFromArchive, METH_VARARGS, NULL},
-	 { (char *)"delete_BinaryArchiveBase", _wrap_delete_BinaryArchiveBase, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_isOpen", _wrap_BinaryArchiveBase_isOpen, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_isReadable", _wrap_BinaryArchiveBase_isReadable, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_isWritable", _wrap_BinaryArchiveBase_isWritable, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_error", _wrap_BinaryArchiveBase_error, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_modeValid", _wrap_BinaryArchiveBase_modeValid, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_size", _wrap_BinaryArchiveBase_size, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_smallestId", _wrap_BinaryArchiveBase_smallestId, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_largestId", _wrap_BinaryArchiveBase_largestId, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_idsAreContiguous", _wrap_BinaryArchiveBase_idsAreContiguous, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_itemExists", _wrap_BinaryArchiveBase_itemExists, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_itemSearch", _wrap_BinaryArchiveBase_itemSearch, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_compressionBufferSize", _wrap_BinaryArchiveBase_compressionBufferSize, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_compressionLevel", _wrap_BinaryArchiveBase_compressionLevel, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_minSizeToCompress", _wrap_BinaryArchiveBase_minSizeToCompress, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_injectMetadata", _wrap_BinaryArchiveBase_injectMetadata, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_isEmptyFile", _wrap_BinaryArchiveBase_isEmptyFile, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_compression", _wrap_BinaryArchiveBase_compression, METH_VARARGS, NULL},
-	 { (char *)"BinaryArchiveBase_swigregister", BinaryArchiveBase_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_BinaryFileArchive", _wrap_new_BinaryFileArchive, METH_VARARGS, NULL},
-	 { (char *)"delete_BinaryFileArchive", _wrap_delete_BinaryFileArchive, METH_VARARGS, NULL},
-	 { (char *)"BinaryFileArchive_flush", _wrap_BinaryFileArchive_flush, METH_VARARGS, NULL},
-	 { (char *)"BinaryFileArchive_swigregister", BinaryFileArchive_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_ArchiveValueRecord_Bool", _wrap_new_ArchiveValueRecord_Bool, METH_VARARGS, NULL},
 	 { (char *)"delete_ArchiveValueRecord_Bool", _wrap_delete_ArchiveValueRecord_Bool, METH_VARARGS, NULL},
 	 { (char *)"ArchiveValueRecord_Bool_swigregister", ArchiveValueRecord_Bool_swigregister, METH_VARARGS, NULL},
@@ -84280,6 +84276,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Ref_String_getValue", _wrap_Ref_String_getValue, METH_VARARGS, NULL},
 	 { (char *)"delete_Ref_String", _wrap_delete_Ref_String, METH_VARARGS, NULL},
 	 { (char *)"Ref_String_swigregister", Ref_String_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_BinaryFileArchive", _wrap_new_BinaryFileArchive, METH_VARARGS, NULL},
+	 { (char *)"delete_BinaryFileArchive", _wrap_delete_BinaryFileArchive, METH_VARARGS, NULL},
+	 { (char *)"BinaryFileArchive_flush", _wrap_BinaryFileArchive_flush, METH_VARARGS, NULL},
+	 { (char *)"BinaryFileArchive_swigregister", BinaryFileArchive_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_MultiFileArchive", _wrap_new_MultiFileArchive, METH_VARARGS, NULL},
 	 { (char *)"delete_MultiFileArchive", _wrap_delete_MultiFileArchive, METH_VARARGS, NULL},
 	 { (char *)"MultiFileArchive_flush", _wrap_MultiFileArchive_flush, METH_VARARGS, NULL},
