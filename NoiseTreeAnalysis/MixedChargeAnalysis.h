@@ -16,6 +16,7 @@
 #include "MixedChargeInfo.h"
 #include "HBHEChannelMap.h"
 #include "ChannelChargeMix.h"
+#include "HcalChargeFilter.h"
 
 #include "geners/AbsArchive.hh"
 
@@ -143,6 +144,10 @@ private:
     // Random number generator
     npstat::AbsRandomGenerator* rng_;
 
+    // Filters for calculating the charge (depending on the operating
+    // mode, this vector can be empty)
+    std::vector<HcalChargeFilter> filters;
+
     // Linearized channel number (index valid up to this->PulseCount)
     unsigned channelNumber_[HBHEChannelMap::ChannelCount];
 
@@ -152,6 +157,15 @@ private:
     // Charge before mixing and charge added (up to this->PulseCount)
     double chargeBeforeMixing_[HBHEChannelMap::ChannelCount];
     double chargeAdded_[HBHEChannelMap::ChannelCount];
+
+    // Similar thing for the sideband charge (up to this->PulseCount)
+    double preCharge_[HBHEChannelMap::ChannelCount];
+    double preChargeAdded_[HBHEChannelMap::ChannelCount];
+    double postCharge_[HBHEChannelMap::ChannelCount];
+    double postChargeAdded_[HBHEChannelMap::ChannelCount];
+
+    // Charge reconstructed by the filter (up to this->PulseCount)
+    double chargeReconstructed_[HBHEChannelMap::ChannelCount];
 
     // Archive for writing out the channel data
     gs::AbsArchive* channelAr_;

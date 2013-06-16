@@ -45,7 +45,11 @@ struct MixedChargeAnalysisOptions
         : randomSeed(0UL),
           centralTS(4),
           minResponseTS(4),
-          maxResponseTS(6)
+          maxResponseTS(6),
+          minPreTS(2),
+          maxPreTS(4),
+          minPostTS(6),
+          maxPostTS(8)
     {
     }
 
@@ -55,10 +59,15 @@ struct MixedChargeAnalysisOptions
         cmdline.require("-m", "--mixFile") >> mixListFile;
         cmdline.require("-r", "--randomSeed") >> randomSeed;
 
+        cmdline.option(NULL, "--filterFile") >> filterFile;
         cmdline.option(NULL, "--channelArchive") >> channelArchive;
         cmdline.option(NULL, "--centralTS") >> centralTS;
         cmdline.option(NULL, "--minResponseTS") >> minResponseTS;
         cmdline.option(NULL, "--maxResponseTS") >> maxResponseTS;
+        cmdline.option(NULL, "--minPreTS") >> minPreTS;
+        cmdline.option(NULL, "--maxPreTS") >> maxPreTS;
+        cmdline.option(NULL, "--minPostTS") >> minPostTS;
+        cmdline.option(NULL, "--maxPostTS") >> maxPostTS;
 
         mixExtraChannels = cmdline.has("-e", "--mixExtra");
 
@@ -69,20 +78,30 @@ struct MixedChargeAnalysisOptions
     void usage(std::ostream& os) const
     {
         os << "-c configFile -m mixFile -r randomSeed [-e]"
+           << " [--filterFile filename]"
            << " [--channelArchive archiveName]"
            << " [--centralTS value]"
            << " [--minResponseTS value]"
            << " [--maxResponseTS value]"
+           << " [--minPreTS value]"
+           << " [--maxPreTS value]"
+           << " [--minPostTS value]"
+           << " [--maxPostTS value]"
             ;
     }
 
     std::string objConfigFile;
     std::string mixListFile;
+    std::string filterFile;
     std::string channelArchive;
     unsigned long randomSeed;
     int centralTS;
     unsigned minResponseTS;
     unsigned maxResponseTS;
+    unsigned minPreTS;
+    unsigned maxPreTS;
+    unsigned minPostTS;
+    unsigned maxPostTS;
     bool mixExtraChannels;
 };
 
@@ -90,11 +109,16 @@ std::ostream& operator<<(std::ostream& os, const MixedChargeAnalysisOptions& o)
 {
     os << "objConfigFile = \"" << o.objConfigFile << '"'
        << ", mixListFile = \"" << o.mixListFile << '"'
+       << ", filterFile = \"" << o.filterFile << '"'
        << ", channelArchive = \"" << o.channelArchive << '"'
        << ", randomSeed = " << o.randomSeed
        << ", centralTS = " << o.centralTS
        << ", minResponseTS = " << o.minResponseTS
        << ", maxResponseTS = " << o.maxResponseTS
+       << ", minPreTS = " << o.minPreTS
+       << ", maxPreTS = " << o.maxPreTS
+       << ", minPostTS = " << o.minPostTS
+       << ", maxPostTS = " << o.maxPostTS
        << ", mixExtraChannels = " << o.mixExtraChannels
         ;
     return os;

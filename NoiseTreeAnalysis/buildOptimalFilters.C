@@ -165,6 +165,7 @@ int main(int argc, char *argv[])
     filterAuxInfo.reserve(HBHEChannelMap::ChannelCount);
 
     // Run fitting cycles
+    ChannelChargeMix mix;
     unsigned lastChan = 0;
     for (unsigned icycle=0; lastChan < HBHEChannelMap::ChannelCount; ++icycle)
     {
@@ -174,7 +175,6 @@ int main(int argc, char *argv[])
             lastChan = HBHEChannelMap::ChannelCount;
         const unsigned nChanFitted = lastChan - firstChan;
         std::vector<ChannelChargeToFit> chanData(nChanFitted);
-        ChannelChargeMix mix;
 
         if (verbose)
         {
@@ -251,7 +251,6 @@ int main(int argc, char *argv[])
             filters.push_back(filter);
         }
     }
-    delete calc; calc = 0;
 
     // Write out fit results
     assert(filters.size() == HBHEChannelMap::ChannelCount);
@@ -289,11 +288,31 @@ int main(int argc, char *argv[])
         return 6;
     }
     rfile.cd();
+
+    // Ntuple for the auxiliary fitting info
     TNtuple* rnt = new TNtuple("filterAuxInfo", "Filter Fit Info",
                                "channel:nEvents:rms");
     for (unsigned i=0; i<HBHEChannelMap::ChannelCount; ++i)
         rnt->Fill(i, filterAuxInfo[i].second, filterAuxInfo[i].first);
-    rfile.Write();
 
+    // Ntuple for the fit residuals
+    TNtuple* resnt = new TNtuple("filterResiduals", "Filter Residuals",
+                                 "channel:charge:residual");
+    for (unsigned long row=0; row<nRows; ++row)
+    {
+        nt->rowContents(row, &mix, 1UL);
+        const HcalChargeFilter& filter(filters.at(mix.channelIndex));
+        if (filter.isValid())
+        {
+            const double fittedCharge = filter(&mix.Charge[0], 10U);
+            const double uncert = (*calc)(mix);
+            assert(uncert > 0.0);
+            const double residual = (fittedCharge - mix.chargeResponse)/uncert;
+            resnt->Fill(mix.channelIndex, mix.chargeResponse, residual);
+        }
+    }
+
+    rfile.Write();
+    delete calc;
     return 0;
 }

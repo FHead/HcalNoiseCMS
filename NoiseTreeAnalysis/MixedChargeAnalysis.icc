@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <algorithm>
 
@@ -16,6 +17,7 @@
 #include "time_stamp.h"
 
 #include "geners/BinaryFileArchive.hh"
+#include "geners/GenericIO.hh"
 
 #include "npstat/rng/MersenneTwister.hh"
 #include "npstat/stat/ArchivedNtuple.hh"
@@ -43,6 +45,8 @@ MixedChargeAnalysis<Options,RootMadeClass>::MixedChargeAnalysis(
     else
         // Default constructor will pick the RNG seed from /dev/urandom
         rng_ = new npstat::MersenneTwister();
+
+    memset(chargeReconstructed_, 0, sizeof(chargeReconstructed_));
 }
 
 
@@ -101,6 +105,19 @@ int MixedChargeAnalysis<Options,RootMadeClass>::beginJob()
             *channelAr_, title, "", 1000000/sizeof(ChannelChargeMix));
     }
 
+    // Load the charge determination filters
+    if (!options_.filterFile.empty())
+    {
+        std::ifstream is(options_.filterFile.c_str(), std::ios::binary);
+        gs::restore_item(is, &filters);
+        if (filters.size() != HBHEChannelMap::ChannelCount)
+        {
+            std::cerr << "Failed to read filters from file \""
+                      << options_.filterFile << "\"." << std::endl;
+            return 1;
+        }
+    }
+
     // Load events used for charge mixing
     if (verbose_)
     {
@@ -140,11 +157,19 @@ int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
         // Determine and remember the channel number for the given "pulse"
         const unsigned chNum = channelMap_.linearIndex(
             this->Depth[i], this->IEta[i], this->IPhi[i]);
+        assert(chNum < HBHEChannelMap::ChannelCount);
         channelNumber_[i] = chNum;
 
         const double* charge = &this->Charge[i][0];
+
         chargeBeforeMixing_[i] = std::accumulate(
             charge+options_.minResponseTS, charge+options_.maxResponseTS, 0.0);
+
+        preCharge_[i] = std::accumulate(
+            charge+options_.minPreTS, charge+options_.maxPreTS, 0.0);
+
+        postCharge_[i] = std::accumulate(
+            charge+options_.minPostTS, charge+options_.maxPostTS, 0.0);
     }
 
     // Mix the extra charge
@@ -160,9 +185,18 @@ int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
 
         // Figure out how much charge was added
         const double* charge = &this->Charge[i][0];
+
         const double chargeAfterMixing = std::accumulate(
             charge+options_.minResponseTS, charge+options_.maxResponseTS, 0.0);
         chargeAdded_[i] = chargeAfterMixing - chargeBeforeMixing_[i];
+
+        const double preAfterMixing = std::accumulate(
+            charge+options_.minPreTS, charge+options_.maxPreTS, 0.0);
+        preChargeAdded_[i] = preAfterMixing - preCharge_[i];
+
+        const double postAfterMixing = std::accumulate(
+            charge+options_.minPostTS, charge+options_.maxPostTS, 0.0);
+        postChargeAdded_[i] = postAfterMixing - postCharge_[i];
 
         // Fill out the channel-by-channel information for subsequent fitting
         if (channelNtuple_)
@@ -170,6 +204,14 @@ int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
             ChannelChargeMix mix(*this, mixInfo_,
                                  chargeBeforeMixing_[i], i, chNum);
             channelNtuple_->fill(mix);
+        }
+
+        // Invoke the filter
+        if (!filters.empty())
+        {
+            const HcalChargeFilter& filter(filters[chNum]);
+            if (filter.isValid())
+                chargeReconstructed_[i] = filter(charge, 10U);
         }
     }
 
@@ -228,9 +270,8 @@ void MixedChargeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                            Double(1)), "TS");
 
     //
-    // Managed histograms in the HBHE group.
-    // These histos will be filled "PulseCount"
-    // times per event.
+    // Managed histograms and ntuples in the HBHE group.
+    // These items will be filled "PulseCount" times per event.
     //
     if (manager_.isRequested("MixedReadouts"))
         manager_.manage(CycledH1D("MixedReadouts", "Number of Mixed Readouts",
@@ -238,6 +279,23 @@ void MixedChargeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                            200, -0.5, 199.5,
                            ElementOf(this->readoutsMixed_),
                            Double(1)), "HBHE");
+
+    if (manager_.isRequested("filteredQNtuple"))
+        manager_.manage(CycledNtuple("FilteredChannelCharge",
+                                     "Filtered Channel Charge", "HBHE",
+                 std::make_tuple(
+                     Column("ChannelNumber",   ElementOf(channelNumber_)),
+                     Column("Energy",          ElementOf(this->Energy)),
+                     Column("RecHitTime",      ElementOf(this->RecHitTime)),
+                     Column("charge",          ElementOf(chargeBeforeMixing_)),
+                     Column("chargeReco",      ElementOf(chargeReconstructed_)),
+                     Column("chargeAdded",     ElementOf(chargeAdded_)),
+                     Column("preCharge",       ElementOf(preCharge_)),
+                     Column("preChargeAdded",  ElementOf(preChargeAdded_)),
+                     Column("postCharge",      ElementOf(postCharge_)),
+                     Column("postChargeAdded", ElementOf(postChargeAdded_)),
+                     Column("readoutsMixed",   ElementOf(readoutsMixed_))
+                 )), "HBHE");
 }
 
 
@@ -248,8 +306,8 @@ void MixedChargeAnalysis<Options,RootMadeClass>::fillManagedHistograms()
     // methods of the manager. Managed histograms will be filled there.
     manager_.AutoFill();
 
-    manager_.CycleFill(this->PulseCount, "HBHE", false);
     manager_.CycleFill(nTimeSlices, "TS", false);
+    manager_.CycleFill(this->PulseCount, "HBHE", false);
 }
 
 
