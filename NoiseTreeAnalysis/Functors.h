@@ -22,6 +22,7 @@
 //
 
 #include <cassert>
+#include <vector>
 
 
 class Double
@@ -251,6 +252,28 @@ template<typename T>
 inline ElementOfHlp<T> ElementOf(T* t, unsigned stride=1)
 {
     return ElementOfHlp<T>(t, stride);
+}
+
+//======================================================================
+
+template<typename T>
+class ElementOfHlpVec
+{
+public:
+    inline ElementOfHlpVec(std::vector<T>& t, const unsigned stride)
+        : ptr_(t), stride_(stride) {}
+    inline const T& operator()(const unsigned i) const
+        {return ptr_[i*stride_];}
+
+private:
+    std::vector<T>& ptr_;
+    unsigned stride_;
+};
+
+template<typename T>
+inline ElementOfHlpVec<T> ElementOf(std::vector<T>& t, unsigned stride=1)
+{
+    return ElementOfHlpVec<T>(t, stride);
 }
 
 //======================================================================

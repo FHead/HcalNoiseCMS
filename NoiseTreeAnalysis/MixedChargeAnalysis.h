@@ -17,6 +17,8 @@
 #include "HBHEChannelMap.h"
 #include "ChannelChargeMix.h"
 #include "HcalChargeFilter.h"
+#include "AbsChannelSelector.h"
+#include "HBHEChannelGeometry.h"
 
 #include "geners/AbsArchive.hh"
 
@@ -46,6 +48,7 @@ public:
     // Publish the Options type definition. This is needed for
     // command line procesing.
     typedef Options options_type;
+    typedef MixedChargeAnalysis<Options, RootMadeClass> MyType;
 
     //
     // The constructor arguments are as follows:
@@ -73,9 +76,8 @@ public:
                         const unsigned long maxEvents, const bool verbose,
                         const Options& opts);
 
-    // The destructor. Here it is trivial, but you will need to implement
-    // it if you manage some resources in your analysis class.
-    inline virtual ~MixedChargeAnalysis() {delete rng_; delete mixManager_;}
+    // The destructor
+    virtual ~MixedChargeAnalysis();
 
     // Simple inspectors for analysis options and "verbosity".
     // They return the arguments provided in the constructor.
@@ -134,6 +136,15 @@ private:
 
     // Channel number mapping tool
     HBHEChannelMap channelMap_;
+
+    // HCAL geometry tool
+    HBHEChannelGeometry channelGeometry_;
+
+    // Channel selector
+    AbsChannelSelector<MyType>* channelSelector_;
+
+    // Mask to be used for selection of good channels
+    std::vector<unsigned char> channelSelectionMask_;
 
     // The charge mixing manager
     ChargeMixingManager<RootMadeClass>* mixManager_;

@@ -168,6 +168,9 @@ means that various CMSSW and boost dependencies were removed. As a minimum,
 all exceptions were converted to standard library exceptions instead of
 edm::Exception.
 
+AbsChannelSelector.h -- Interface class for implementing the code which
+                        selects "good" channels.
+
 AbsQUncertaintyCalculator.h -- This header files defines an interface
                         for calculating the channel charge determination
                         uncertainty.

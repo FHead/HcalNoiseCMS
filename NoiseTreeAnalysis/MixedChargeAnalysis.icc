@@ -33,6 +33,10 @@ MixedChargeAnalysis<Options,RootMadeClass>::MixedChargeAnalysis(
       options_(opts),
       verbose_(verbose),
       manager_(outputfile, histoRequest),
+      channelGeometry_(opts.hbGeometryFile.c_str(),
+                       opts.heGeometryFile.c_str()),
+      channelSelector_(0),
+      channelSelectionMask_(HBHEChannelMap::ChannelCount, 1U),
       mixManager_(new ChargeMixingManager<RootMadeClass>(
                       opts.objConfigFile, verbose)),
       mixInfo_(opts.mixExtraChannels, opts.centralTS),
@@ -50,6 +54,15 @@ MixedChargeAnalysis<Options,RootMadeClass>::MixedChargeAnalysis(
 }
 
 
+template <class Options, class RootMadeClass>
+MixedChargeAnalysis<Options,RootMadeClass>::~MixedChargeAnalysis()
+{
+    delete rng_;
+    delete mixManager_;
+    delete channelSelector_;
+}
+
+    
 template <class Options, class RootMadeClass>
 Int_t MixedChargeAnalysis<Options,RootMadeClass>::Cut(Long64_t /* entry */)
 {
@@ -151,7 +164,6 @@ int MixedChargeAnalysis<Options,RootMadeClass>::beginJob()
 template <class Options, class RootMadeClass>
 int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
 {
-    // Cycle over channel data before mixing the charge
     for (Int_t i=0; i<this->PulseCount; ++i)
     {
         // Determine and remember the channel number for the given "pulse"
@@ -172,6 +184,11 @@ int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
             charge+options_.minPostTS, charge+options_.maxPostTS, 0.0);
     }
 
+    // Select "good" channels
+    if (channelSelector_)
+        channelSelector_->select(*this, &channelSelectionMask_);
+
+    // Cycle over channel data before mixing the charge
     // Mix the extra charge
     // const int numAllChannels = mixExtraCharge();
     mixExtraCharge();
@@ -199,7 +216,7 @@ int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
         postChargeAdded_[i] = postAfterMixing - postCharge_[i];
 
         // Fill out the channel-by-channel information for subsequent fitting
-        if (channelNtuple_)
+        if (channelNtuple_ && channelSelectionMask_[i])
         {
             ChannelChargeMix mix(*this, mixInfo_,
                                  chargeBeforeMixing_[i], i, chNum);
@@ -287,6 +304,7 @@ void MixedChargeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                      Column("ChannelNumber",   ElementOf(channelNumber_)),
                      Column("Energy",          ElementOf(this->Energy)),
                      Column("RecHitTime",      ElementOf(this->RecHitTime)),
+                     Column("selected",        ElementOf(channelSelectionMask_)),
                      Column("charge",          ElementOf(chargeBeforeMixing_)),
                      Column("chargeReco",      ElementOf(chargeReconstructed_)),
                      Column("chargeAdded",     ElementOf(chargeAdded_)),
