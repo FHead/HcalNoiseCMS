@@ -120,6 +120,11 @@ Functors.h            -- Functor classes for use with automatically filled
 HistogramManager.h    -- Manager class for automatically filled histograms
 HistogramManager.C       and ntuples.
 
+inputValidation.hh    -- Generic validation for input parameters. The functions
+                         in this file check that the parameter falls in some
+                         range and throw std::invalid_argument (with a
+                         meaningful description) in case it does not.
+
 ManagedHisto.h        -- Base class for automatically filled histograms
                          and ntuples. HistogramManager holds collections
                          of classes derived from it.
@@ -163,23 +168,63 @@ means that various CMSSW and boost dependencies were removed. As a minimum,
 all exceptions were converted to standard library exceptions instead of
 edm::Exception.
 
+AbsQUncertaintyCalculator.h -- This header files defines an interface
+                        for calculating the channel charge determination
+                        uncertainty.
+
 analyzeEChanNtuple.C -- Helper executable for building energy distributions
                         out of observed samples.
 
 analyzeEChargeNtuple.C -- Fit 2-d linear regression model to the energy
                           dependence on charge in TS4 and TS5.
 
+buildOptimalFilters.C -- Helper executable for building optimal charge
+                         filters (see also "fitHcalCharge.h" description).
+
+ChannelChargeInfo.h  -- A struct which contains charge-related information
+                        for a single HBHE channel.
+
+ChannelChargeMix.h   -- A persistent struct which contains charge-related
+ChannelChargeMix.C      information for a single HBHE channel after charge
+                        mixing has been performed.
+
+ChargeMixingManager.h -- The code which loads events (and later combines
+ChargeMixingManager.icc  time-shifted versions of them) for charge mixing.
+
 ChannelGroupInfo.h   -- Summary info for a group of channels. Used to
                         study channels grouped by HPD as well as those
                         channels neighboring an HPD.
 
+DefaultQUncertaintyCalculator.h -- A simple implementation of charge
+DefaultQUncertaintyCalculator.C    uncertainty calculator (inherits from
+                                   AbsQUncertaintyCalculator). The uncertainty
+                                   depends only on charge Q itslef according to
+                                   the formula a*Q + b*sqrt(Q) + c with some
+                                   constants a, b, and c.
+
 DetId.h              -- The CMS detector id. Lifted from CMSSW code
                         DataFormats/DetId/interface/DetId.h.
 
+dumpContainmentCorrection.C -- Executable for saving pulse shape corrections
+                               as histograms for subsequent visualization.
+
+EventChargeInfo.h    -- A struct which contains charge-related information
+                        for a complete event, in a form suitable for
+                        subsequent mixing.
+
 Filter10.h           -- Linear filtering for the time structure of HCAL pulses.
+
+fitHcalCharge.h      -- Functions for building optimal linear and quadratic
+fitHcalCharge.C         filters which reconstruct the original signal charge
+                        from charge mixtures.
 
 fitHcalEnergies.h    -- Code which can be used to fit 2-d linear regression
 fitHcalEnergies.C       models (such as energy dependence on two time slices)
+
+genlkupmap.h         -- Apparently, some kind of a lookup table generation
+                        utility, internal to the HCAL pulse shape correction
+                        code. Lifted from CMSSW file
+                        CalibCalorimetry/HcalAlgos/interface/genlkupmap.h.
 
 HBHEChannelMap.h     -- Numerology for finding collections of HCAL channels
 HBHEChannelMap.C        that belong the same HPD and/or for navigating
@@ -191,6 +236,10 @@ HBHEChannelGeometry.h -- Geometrical information for HB and HE channels.
 HBHEChannelGeometry.C    This is, basically, a lookup table of channel
                          physical directions by channel number.
 
+HcalChargeFilter.h   -- Charge calculation after mixing using optimal
+HcalChargeFilter.C      regression coefficients. Provides persistent
+                        storage for regression coefficients for one channel.
+
 HcalDetId.h          -- Numerology for naming HCAL channels. Used internally
 HcalDetId.C             by HBHEChannelMap and HcalHPDRBXMap. Lifted from
                         DataFormats/HcalDetId/interface/HcalDetId.h.
@@ -199,8 +248,28 @@ HcalHPDRBXMap.h      -- Numerology for finding collections of HCAL channels
 HcalHPDRBXMap.C         that belong the same RBX. Lifted from CMSSW code
                         RecoMET/METAlgorithms/interface/HcalHPDRBXMap.h.
 
+HcalPulseContainmentAlgo.h -- Pulse shape correction algorithm parameters.
+HcalPulseContainmentAlgo.C    Lifted from CMSSW code
+                     CalibCalorimetry/HcalAlgos/src/HcalPulseContainmentAlgo.h.
+
+HcalPulseContainmentCorrection.h -- Pulse shape correction code.
+HcalPulseContainmentCorrection.C    Lifted from CMSSW code
+         CalibCalorimetry/HcalAlgos/interface/HcalPulseContainmentCorrection.h.
+
+HcalPulseShape.h     -- HCAL pulse shape management (by number). Lifted
+HcalPulseShape.C        from CMSSW sources at
+HcalPulseShapes.h       CalibCalorimetry/HcalAlgos/interface/HcalPulseShape.h,
+HcalPulseShapes.C       CalibCalorimetry/HcalAlgos/interface/HcalPulseShapes.h.
+
+HcalShapeIntegrator.h -- HCAL pulse shape integrator. Lifted from CMSSW
+HcalShapeIntegrator.C    sources at
+                    CalibCalorimetry/HcalAlgos/interface/HcalShapeIntegrator.h.
+
 HcalSubdetector.h    -- Definition of HCAL subdetectors. Lifted from
                         DataFormats/HcalDetId/interface/HcalSubdetector.h
+
+HcalTimeSlew.h       -- HCAL QIE pulse delay as a function of amplitude. From
+HcalTimeSlew.C          CalibCalorimetry/HcalAlgos/interface/HcalTimeSlew.h.
 
 NoiseTreeAnalysis.h  -- A data analysis class which can be used to
 NoiseTreeAnalysis.icc   histogram almost all variables in the TTree defined
@@ -220,9 +289,28 @@ NoiseTreeData.C         noise study TTree.
 making_a_class.C     -- Example script which runs "MakeClass" in an interactive
                         root session.
 
+make_configFile.py   -- Script for configuring charge mixing probabilities and
+                        generators.
+
+MixedChargeAnalysis.h  -- A data analysis class to analyze events in which
+MixedChargeAnalysis.icc   additional charge is mixed from other events.
+
+MixedChargeAnalysisOptions.h -- Command line options for MixedChargeAnalysis.
+
+MixedChargeInfo.h    -- This class contains all information necessary to
+MixedChargeInfo.icc     mix extra charge to a given event represented by
+MixedChargeInfo.C       NoiseTreeData or another similar class. It works
+                        in tandem with ChargeMixingManager.
+
+npstat.py            -- SWIG-generated python wrapper for some of the facilities
+npstat_wrap_v2_0_0.cc   included in the "Geners" and "NPStat" packages.
+
 runNoiseTreeAnalysis.ana -- Analysis definition file for generating the
                         executable which creates and uses the NoiseTreeAnalysis
                         class.
+
+runMixedChargeAnalysis.ana -- Analysis definition file for generating the
+                        executable which uses the MixedChargeAnalysis class.
 
 
 Miscellaneous utilities
@@ -234,6 +322,10 @@ time_stamp.h         -- Current time as an std::string.
 
 deltaPhi.h           -- Delta phi difference overloaded for scalars and vectors
 
+skipComments.h       -- Load lines from a file skipping pure white space
+skipComments.C          lines and comment lines. Comment lines are the lines
+                        starting with # after, possibly, some amount of white
+                        space.
 
 Makefiles
 ---------
@@ -255,9 +347,12 @@ analysis_framework.txt   -- Brief description of the framework usage.
 install_dependencies.csh -- Script which shows how to install "Geners"
                             and "NPStat".
 
+setup.csh                -- Script to use for updating LD_LIBRARY_PATH
+                            before running any executable.
+
 Most header files are reasonably well commented; doxygen formatting
 statements should probably be added there as well.
 
 
 Igor Volobouev
-April 03, 2013
+June 17, 2013
