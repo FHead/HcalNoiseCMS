@@ -14,7 +14,10 @@
 //
 // 3) Method "void parse(CmdLine& cmdline)"
 //
-// 4) Method "void usage(std::ostream& os) const" for printing usage
+// 4) Method "void listOptions(std::ostream& os) const" for printing
+//    available options
+//
+// 5) Method "void usage(std::ostream& os) const" for printing usage
 //    instructions
 //
 // Preferably, this class should also have "operator<<" for printing
@@ -50,9 +53,15 @@ struct ExampleAnalysisOptions
         cmdline.option(NULL, "--exampleOption") >> exampleOption;
     }
 
-    void usage(std::ostream& os) const
+    void listOptions(std::ostream& os) const
     {
         os << "[--exampleOption value]";
+    }
+
+    void usage(std::ostream& os) const
+    {
+        os << " --exampleOption    An integer option which you can provide to this\n"
+           << "                    example program.\n" << std::endl;
     }
 
     int exampleOption;

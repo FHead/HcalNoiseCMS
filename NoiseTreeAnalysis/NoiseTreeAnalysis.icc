@@ -105,7 +105,7 @@ void NoiseTreeAnalysis<Options,RootMadeClass>::loadOccupancyConverters()
     {
         gs::StringArchive* ar = gs::readCompressedStringArchive(
             options_.convertersGSSAFile.c_str());
-        occupancyCoverters_.reserve(HBHEChannelMap::ChannelCount);
+        occupancyConverters_.reserve(HBHEChannelMap::ChannelCount);
  
         // Load the converter for each channel
         char buf[12];
@@ -114,7 +114,7 @@ void NoiseTreeAnalysis<Options,RootMadeClass>::loadOccupancyConverters()
             sprintf(buf, "%u", i);
             gs::Reference<npstat::LeftCensoredDistribution> ref(*ar, buf, "");
             assert(ref.unique());
-            occupancyCoverters_.push_back(ref.getShared(0));
+            occupancyConverters_.push_back(ref.getShared(0));
         }
     }
 }
@@ -143,14 +143,14 @@ double NoiseTreeAnalysis<Options,RootMadeClass>::calculatePseudoLogLikelihood(
     const std::vector<unsigned>& channels) const
 {
     double pseudoLogli = 0.0;
-    if (!occupancyCoverters_.empty())
+    if (!occupancyConverters_.empty())
     {
         unsigned nGood = 0;
         const unsigned nChannels = channels.size();
         for (unsigned i=0; i<nChannels; ++i)
         {
             const unsigned chan = channels[i];
-            const double vfrac = occupancyCoverters_[chan]->visibleFraction();
+            const double vfrac = occupancyConverters_[chan]->visibleFraction();
             if (vfrac > 0.0)
             {
                 ++nGood;
@@ -158,7 +158,7 @@ double NoiseTreeAnalysis<Options,RootMadeClass>::calculatePseudoLogLikelihood(
                 if (iPulse >= 0)
                 {
                     double logdelta = -options_.maxLogContribution;
-                    const double ex = occupancyCoverters_[chan]->exceedance(
+                    const double ex = occupancyConverters_[chan]->exceedance(
                         this->Energy[iPulse]);
                     if (ex > 0.0)
                     {

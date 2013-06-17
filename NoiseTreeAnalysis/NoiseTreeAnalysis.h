@@ -116,7 +116,7 @@ private:
     // Table of distributions which convert energy values seen
     // into occupancy above that energy and back
     typedef std::shared_ptr<npstat::LeftCensoredDistribution> OccConverterPtr;
-    std::vector<OccConverterPtr> occupancyCoverters_;
+    std::vector<OccConverterPtr> occupancyConverters_;
 
     // Pulse containment correction
     HcalPulseContainmentCorrection* corr_;

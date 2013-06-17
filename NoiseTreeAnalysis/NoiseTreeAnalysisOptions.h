@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "CmdLine.hh"
+#include "inputValidation.hh"
 
 //
 // Class NoiseTreeAnalysisOptions must have
@@ -14,7 +15,10 @@
 //
 // 3) Method "void parse(CmdLine& cmdline)"
 //
-// 4) Method "void usage(std::ostream& os) const" for printing usage
+// 4) Method "void listOptions(std::ostream& os) const" for printing
+//    available options
+//
+// 5) Method "void usage(std::ostream& os) const" for printing usage
 //    instructions
 //
 // Preferably, this class should also have "operator<<" for printing
@@ -64,14 +68,14 @@ struct NoiseTreeAnalysisOptions
         cmdline.option(NULL, "--maxTSlice") >> maxTSlice;
         cmdline.option(NULL, "--hpdShapeNumber") >> hpdShapeNumber;
 
-        if (minTSlice > 10 || maxTSlice > 10 || minTSlice >= maxTSlice)
-            throw CmdLineError("Invalid specification for time slice integration");
+        validateRangeLELT(minTSlice, "minTSlice", 0U, 9U);
+        validateRangeLELT(maxTSlice, "maxTSlice", minTSlice+1U, 10U);
 
         if (maxLogContribution < 0.0)
             throw CmdLineError("Invalid specification for maxLogContribution");
     }
 
-    void usage(std::ostream& os) const
+    void listOptions(std::ostream& os) const
     {
         os << "[--converters converterFile]"
            << " [--hbgeo filename]"
@@ -83,6 +87,38 @@ struct NoiseTreeAnalysisOptions
            << " [--maxTSlice tSlice]"
            << " [--hpdShapeNumber value]"
             ;
+    }
+
+    void usage(std::ostream& os) const
+    {
+        os << " --converters            Name of the \"Geners\" string archive which contains\n"
+           << "                         the functions that convert observed energy into\n"
+           << "                         p-values. This file should normally be produced by\n"
+           << "                         the \"analyzeEChanNtuple\" executable.\n\n";
+        os << " --hbgeo                 File containing HB geometry description. The default\n"
+           << "                         value of this option is \"Geometry/hb.ctr\". If this\n"
+           << "                         value is incorrect (i.e., if the program is run from\n"
+           << "                         some directory other than the source directory),\n"
+           << "                         correct value of this option must be provided.\n\n";
+        os << " --hegeo                 File containing HE geometry description. The default\n"
+           << "                         value of this option is \"Geometry/he.ctr\". If this\n"
+           << "                         value is incorrect (i.e., if the program is run from\n"
+           << "                         some directory other than the source directory),\n"
+           << "                         correct value of this option must be provided.\n\n";
+        os << " --maxLogContribution    Maximum contribution (by modulus) a channel can make\n"
+           << "                         into the energy-based pseudo loglikelihood of a group\n"
+           << "                         of channels. Default value of this option is 10.0.\n\n";
+        os << " --correctionPhaseNS     The value, in nanoseconds, of the \"phase\" parameter\n"
+           << "                         for the energy pulse shape correction. Default value\n"
+           << "                         of this option is 6.0.\n\n";
+        os << " --nPhiBins              Number of bins to use for histograms of various phi\n"
+           << "                         angle distributions. Default is 144.\n\n";
+        os << " --minTSlice             Minimum time slice (included) for channel charge\n"
+           << "                         determination. Default is 4.\n\n";
+        os << " --maxTSlice             Maximum time slice (excluded) for channel charge\n"
+           << "                         determination. Default is 6.\n\n";
+        os << " --hpdShapeNumber        \"Pulse shape number\" for the energy pulse shape\n"
+           << "                         correction. Default value of this option is 105.\n\n";
     }
 
     std::string convertersGSSAFile;
