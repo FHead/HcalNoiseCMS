@@ -25,6 +25,20 @@ make
 make install
 make check
 
+# Installing "FFTJet". See http://fftjet.hepforge.org
+cd ${HOME}/local/src
+wget http://www.hepforge.org/archive/fftjet/fftjet-1.4.1.tar.gz
+tar -xzf fftjet-1.4.1.tar.gz
+rm -f fftjet-1.4.1.tar.gz
+cd fftjet-1.4.1
+setenv CXXFLAGS -std=c++0x
+setenv F77 gfortran
+setenv PKG_CONFIG_PATH ${HOME}/local/lib/pkgconfig
+./configure --with-pic --prefix=${HOME}/local
+make
+make install
+make check
+
 # Installing "NPStat". See http://npstat.hepforge.org
 cd ${HOME}/local/src
 wget http://www.hepforge.org/archive/npstat/npstat-2.0.0.tar.gz
@@ -32,21 +46,9 @@ tar -xzf npstat-2.0.0.tar.gz
 rm -f npstat-2.0.0.tar.gz
 cd npstat-2.0.0
 setenv CXXFLAGS -std=c++0x
+setenv F77 gfortran
 setenv PKG_CONFIG_PATH ${HOME}/local/lib/pkgconfig
 ./configure --with-pic --prefix=${HOME}/local
 make
 make install
-
-# The following will not work if you are installing these packages
-# with CMSSW set up. This is because "NPStat" is using some Fortran
-# libraries (lapack and blas) and "configure", due to some reason,
-# wants to search for them on the local machine (e.g., in /usr/lib64).
-# This search path interferes with the library search path from
-# the CMSSW installation.
-#
-# To make sure things work as expected, you will need to edit the
-# Makefile in the ${HOME}/local/src/npstat-2.0.0/examples/C++ directory
-# and manually change the "FLIBS" variable so that it looks something
-# like "FLIBS = -lgfortran -lm", without any search path specified.
-# 
 make check
