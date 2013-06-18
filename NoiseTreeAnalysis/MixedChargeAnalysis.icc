@@ -16,6 +16,7 @@
 #include "Functors.h"
 #include "time_stamp.h"
 #include "FFTJetChannelSelector.h"
+#include "LeadingJetChannelSelector.h"
 
 #include "geners/BinaryFileArchive.hh"
 #include "geners/GenericIO.hh"
@@ -44,25 +45,43 @@ MixedChargeAnalysis<Options,RootMadeClass>::MixedChargeAnalysis(
       channelAr_(0),
       channelNtuple_(0)
 {
+    // Initialize channel selector
+    if (opts.channelSelector == "FFTJetChannelSelector")
+    {
+        const unsigned nPhiBins = 128;
+        const unsigned nEtaBins = 256;
+        const double etaMax = 2.0*M_PI;
+        const double etaMin = -etaMax;
+        channelSelector_ = new FFTJetChannelSelector<MyType>(
+            channelGeometry_, nEtaBins, etaMin, etaMax, nPhiBins,
+            opts.pattRecoScale, opts.etaToPhiBandwidthRatio,
+            opts.coneSize, opts.peakEtCutoff, opts.jetPtCutoff);
+    }
+    else if (opts.channelSelector == "AllChannelSelector")
+        channelSelector_ = new AllChannelSelector<MyType>();
+    else if (opts.channelSelector == "LeadingJetChannelSelector")
+        channelSelector_ = new LeadingJetChannelSelector<MyType>(
+            channelGeometry_, opts.coneSize,
+            opts.etaToPhiBandwidthRatio, opts.jetPtCutoff);
+    else
+    {
+        std::ostringstream os;
+        os << "In MixedChargeAnalysis constructor: unsupported channel "
+           << "selector class \"" << opts.channelSelector << '"';
+        throw std::invalid_argument(os.str());
+    }
+
+    // Initialize charge mixing manager
     if (!options_.disableChargeMixing)
         mixManager_ = new ChargeMixingManager<RootMadeClass>(
             opts.objConfigFile, verbose);
 
+    // Initialize random number generator
     if (opts.randomSeed)
         rng_ = new npstat::MersenneTwister(opts.randomSeed);
     else
         // Default constructor will pick the RNG seed from /dev/urandom
         rng_ = new npstat::MersenneTwister();
-
-    // Initialize channel selector
-    const unsigned nPhiBins = 128;
-    const unsigned nEtaBins = 256;
-    const double etaMax = 2.0*M_PI;
-    const double etaMin = -etaMax;
-    channelSelector_ = new FFTJetChannelSelector<MyType>(
-        channelGeometry_, nEtaBins, etaMin, etaMax, nPhiBins,
-        opts.pattRecoScale, opts.etaToPhiBandwidthRatio,
-        opts.coneSize, opts.peakEtCutoff, opts.jetPtCutoff);
 
     // Zero out various arrays whose filling may be skipped
     memset(readoutsMixed_, 0, sizeof(readoutsMixed_));
@@ -76,9 +95,9 @@ MixedChargeAnalysis<Options,RootMadeClass>::MixedChargeAnalysis(
 template <class Options, class RootMadeClass>
 MixedChargeAnalysis<Options,RootMadeClass>::~MixedChargeAnalysis()
 {
-    delete channelSelector_;
     delete rng_;
     delete mixManager_;
+    delete channelSelector_;
 }
 
     

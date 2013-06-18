@@ -47,6 +47,7 @@ struct MixedChargeAnalysisOptions
     MixedChargeAnalysisOptions()
         : hbGeometryFile("Geometry/hb.ctr"),
           heGeometryFile("Geometry/he.ctr"),
+          channelSelector("LeadingJetChannelSelector"),
           pattRecoScale(0.2),
           etaToPhiBandwidthRatio(1.0),
           coneSize(0.5),
@@ -81,6 +82,7 @@ struct MixedChargeAnalysisOptions
 
         cmdline.option(NULL, "--hbgeo") >> hbGeometryFile;
         cmdline.option(NULL, "--hegeo") >> heGeometryFile;
+        cmdline.option(NULL, "--channelSelector") >> channelSelector;
 
         cmdline.option(NULL, "--pattRecoScale") >> pattRecoScale;
         cmdline.option(NULL, "--etaToPhiBandwidthRatio") >> etaToPhiBandwidthRatio;
@@ -109,6 +111,7 @@ struct MixedChargeAnalysisOptions
            << " [--disableChargeMixing]"
            << " [--hbgeo filename]"
            << " [--hegeo filename]"
+           << " [--channelSelector classname]"
            << " [--pattRecoScale value]"
            << " [--etaToPhiBandwidthRatio value]"
            << " [--coneSize value]"
@@ -157,6 +160,10 @@ struct MixedChargeAnalysisOptions
            << "                     will be written for subsequent filter fitting by the\n"
            << "                     \"buildOptimalFilters\" program.  By default, no such\n"
            << "                     archive is created.\n\n";
+        os << " --channelSelector   Class to use for selecting good channels. Valid\n"
+              "                     values of this option are \"FFTJetChannelSelector\",\n"
+              "                     \"LeadingJetChannelSelector\", and \"AllChannelSelector\".\n"
+              "                     Default is \"LeadingJetChannelSelector\".\n\n";
         os << " --pattRecoScale     Pattern recognition scale for FFTJet jet reconstruction.\n"
            << "                     Default value is 0.2.\n\n";
         os << " --etaToPhiBandwidthRatio   Eta/phi pattern recognition bandwidth ratio and\n"
@@ -192,6 +199,7 @@ struct MixedChargeAnalysisOptions
     std::string mixListFile;
     std::string filterFile;
     std::string channelArchive;
+    std::string channelSelector;
 
     double pattRecoScale;
     double etaToPhiBandwidthRatio;
@@ -219,6 +227,7 @@ std::ostream& operator<<(std::ostream& os, const MixedChargeAnalysisOptions& o)
        << ", mixFile = \"" << o.mixListFile << '"'
        << ", filterFile = \"" << o.filterFile << '"'
        << ", channelArchive = \"" << o.channelArchive << '"'
+       << ", channelSelector = \"" << o.channelSelector << '"'
        << ", pattRecoScale = \"" << o.pattRecoScale << '"'
        << ", etaToPhiBandwidthRatio = \"" << o.etaToPhiBandwidthRatio << '"'
        << ", coneSize = \"" << o.coneSize << '"'

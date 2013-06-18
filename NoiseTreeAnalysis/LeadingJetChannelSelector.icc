@@ -1,0 +1,79 @@
+#include <cmath>
+#include <cassert>
+
+template <class AnalysisClass>
+LeadingJetChannelSelector<AnalysisClass>::LeadingJetChannelSelector(
+    const HBHEChannelGeometry& geometry,
+    const double coneSize, const double etaToPhiBandwidthRatio,
+    const double hadronicPtCutoff)
+    : geometry_(geometry),
+      hadronicPtCutoff_(hadronicPtCutoff),
+      etaConeSize_(coneSize*sqrt(etaToPhiBandwidthRatio)),
+      phiConeSize_(coneSize/sqrt(etaToPhiBandwidthRatio))
+{
+    assert(coneSize > 0.0);
+    assert(etaToPhiBandwidthRatio > 0.0);
+}
+
+template <class AnalysisClass>
+void LeadingJetChannelSelector<AnalysisClass>::select(
+    const AnalysisClass& event, std::vector<unsigned char>* mask)
+{
+    assert(mask);
+    mask->clear();
+    mask->reserve(event.PulseCount);
+
+    double jetEta[2], jetPhi[2];
+    unsigned jetCount = 0;
+
+    if (event.LeadingJetPt > 0.0)
+    {
+        const double e = event.LeadingJetPt*cosh(event.LeadingJetEta);
+        const double hfrac = event.LeadingJetHad/e;
+        const double hadPt = event.LeadingJetPt*hfrac;
+        if (hadPt > hadronicPtCutoff_)
+        {
+            jetEta[jetCount] = event.LeadingJetEta;
+            jetPhi[jetCount] = event.LeadingJetPhi;
+            ++jetCount;
+        }
+    }
+
+    if (event.FollowingJetPt > 0.0)
+    {
+        const double e = event.FollowingJetPt*cosh(event.FollowingJetEta);
+        const double hfrac = event.FollowingJetHad/e;
+        const double hadPt = event.FollowingJetPt*hfrac;
+        if (hadPt > hadronicPtCutoff_)
+        {
+            jetEta[jetCount] = event.FollowingJetEta;
+            jetPhi[jetCount] = event.FollowingJetPhi;
+            ++jetCount;
+        }
+    }
+
+    if (jetCount)
+    {
+        for (int i=0; i<event.PulseCount; ++i)
+        {
+            const unsigned chNum = event.getHBHEChannelNumber(i);
+            const TVector3& dir(geometry_.getDirection(chNum));
+            const double eta = dir.Eta();
+            const double phi = dir.Phi();
+            unsigned char isClose = 0;
+            for (unsigned ijet=0; ijet<jetCount && !isClose; ++ijet)
+            {
+                const double dEta = (eta - jetEta[ijet])/etaConeSize_;
+                const double dPhi = nta::deltaPhi(phi, jetPhi[ijet])/phiConeSize_;
+                isClose = dEta*dEta + dPhi*dPhi < 1.0;
+            }
+            mask->push_back(isClose);
+        }
+    }
+    else
+    {
+        const unsigned char zero = 0;
+        for (int i=0; i<event.PulseCount; ++i)
+            mask->push_back(zero);
+    }
+}

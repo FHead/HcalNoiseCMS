@@ -80,6 +80,8 @@ years ago -- they don't think it is a bug, they think it is a feature.
 I can't help but wonder how many "features" like that are lurking in
 the root code, messing up data analyses of unsuspecting users.
 
+Local (HBHE only) jet reconstruction is performed with the help of FFTJet
+package ( http://fftjet.hepforge.org ).
 
 Here is the list of files included in this directory, with brief
 descriptions. The files are loosely grouped by their purpose.
@@ -274,6 +276,11 @@ HcalSubdetector.h    -- Definition of HCAL subdetectors. Lifted from
 HcalTimeSlew.h       -- HCAL QIE pulse delay as a function of amplitude. From
 HcalTimeSlew.C          CalibCalorimetry/HcalAlgos/interface/HcalTimeSlew.h.
 
+JetSummary.h         -- Summary of local (HBHE only) jet reconstruction.
+
+LeadingJetChannelSelector.h  -- Channel selector using the two leading jets.
+LeadingJetChannelSelector.icc
+
 NoiseTreeAnalysis.h  -- A data analysis class which can be used to
 NoiseTreeAnalysis.icc   histogram almost all variables in the TTree defined
                         by Yi Chen (with exception of event id variables,
@@ -314,6 +321,13 @@ runNoiseTreeAnalysis.ana -- Analysis definition file for generating the
 
 runMixedChargeAnalysis.ana -- Analysis definition file for generating the
                         executable which uses the MixedChargeAnalysis class.
+
+FFTJetChannelSelector.h   -- These files perform selection of "good" channels
+FFTJetChannelSelector.icc    by associating them with energetic jets locally
+                             reconstructed by FFTJet.
+
+fftjetTypedefs.h     -- Basic typedefs needed for FFTJet to work.
+VBuilders.h
 
 
 Miscellaneous utilities
@@ -358,4 +372,4 @@ statements should probably be added there as well.
 
 
 Igor Volobouev
-June 17, 2013
+June 18, 2013
