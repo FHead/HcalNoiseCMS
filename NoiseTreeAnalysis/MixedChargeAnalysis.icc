@@ -100,7 +100,7 @@ MixedChargeAnalysis<Options,RootMadeClass>::~MixedChargeAnalysis()
     delete channelSelector_;
 }
 
-    
+
 template <class Options, class RootMadeClass>
 Int_t MixedChargeAnalysis<Options,RootMadeClass>::Cut(Long64_t /* entry */)
 {
@@ -172,24 +172,15 @@ int MixedChargeAnalysis<Options,RootMadeClass>::beginJob()
         }
 
         // Load events used for charge mixing
-        if (verbose_)
-        {
-            std::cout << "Loading events for charge mixing... ";
-            std::cout.flush();
-        }        
         TChain* chain = dynamic_cast<TChain*>(this->fChain);
         assert(chain);
         if (!mixManager_->loadEventsToMix(options_.mixListFile,
                                           chain->GetName(), channelMap_))
         {
             if (verbose_)
-                std::cout << "Failed" << std::endl;
+                std::cerr << "Failed to load events for charge mixing."
+                          << std::endl;
             return 1;
-        }
-        if (verbose_)
-        {
-            std::cout << "Done\n";
-            std::cout.flush();
         }
     }
 
