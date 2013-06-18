@@ -1,0 +1,122 @@
+#include <cmath>
+#include <sstream>
+#include <stdexcept>
+#include <algorithm>
+
+#include "deltaPhi.h"
+
+namespace {
+    struct LocalSortByPt
+    {
+        template<class Jet>
+        inline bool operator()(const Jet& l, const Jet& r) const
+            {return l.vec().Perp2() > r.vec().Perp2();}
+    };
+}
+
+template <class AnalysisClass>
+FFTJetChannelSelector<AnalysisClass>::FFTJetChannelSelector(
+    const HBHEChannelGeometry& geometry,
+    const unsigned nEtaBins, const double etaMin, const double etaMax,
+    const unsigned nPhiBins, const double patRecoScale,
+    const double etaToPhiBandwidthRatio, const double coneSize,
+    const double peakEtCutoff, const double jetPtCutoff)
+    : geometry_(geometry),
+      patRecoScale_(patRecoScale),
+      jetPtCutoff_(jetPtCutoff),
+      etaConeSize_(coneSize*sqrt(etaToPhiBandwidthRatio)),
+      phiConeSize_(coneSize/sqrt(etaToPhiBandwidthRatio)),
+      calo_(nEtaBins, etaMin, etaMax, nPhiBins, 0.0),
+      engine_(nEtaBins, nPhiBins),
+      kernel_(2.0*M_PI*sqrt(etaToPhiBandwidthRatio)/(etaMax - etaMin),
+              1.0/sqrt(etaToPhiBandwidthRatio), nEtaBins, nPhiBins),
+      convolver_(&engine_, &kernel_),
+      peakFinder_(1.e-10),
+      peakSelector_(peakEtCutoff/patRecoScale/patRecoScale/
+                    (nEtaBins*nPhiBins/(etaMax - etaMin))),
+      jetMemberFcn_(etaConeSize_, phiConeSize_, 1),
+      noiseMemberFcn_(1.e-8, 0.0),
+      recoAlg_(&jetMemberFcn_, &noiseMemberFcn_, 0.0, 0.0, true, false, false),
+      sequencer_(&convolver_, &peakSelector_, peakFinder_, &recoAlg_),
+      unclusScalar_(0.0),
+      sumEt_(0.0)
+{
+    assert(patRecoScale > 0.0);
+    assert(coneSize > 0.0);
+    assert(etaToPhiBandwidthRatio > 0.0);
+    assert(etaMax > etaMin);
+}
+
+template <class AnalysisClass>
+void FFTJetChannelSelector<AnalysisClass>::select(
+    const AnalysisClass& event,
+    std::vector<unsigned char>* mask)
+{
+    assert(mask);
+    mask->clear();
+    mask->reserve(event.PulseCount);
+
+    // Discretize event energy flow
+    calo_.reset();
+    long double accEt = 0.0L;
+    for (int i=0; i<event.PulseCount; ++i)
+    {
+        const double energy = event.Energy[i];
+        const unsigned chNum = event.getHBHEChannelNumber(i);
+        const TVector3& dir(geometry_.getDirection(chNum));
+        const double eta = dir.Eta();
+        const double phi = dir.Phi();
+        const double Et = energy*dir.Perp();
+        accEt += Et;
+        calo_.fill(eta, phi, Et);
+    }
+    sumEt_ = accEt;
+
+    // Run the single-scale version of FFTJet algorithm
+    BgData ignored = 0.0;
+    const int status = sequencer_.run(patRecoScale_, calo_, &ignored, 1U, 1U,
+                                      &recoJets_, &unclustered_, &unclusScalar_);
+    if (status)
+    {
+        std::ostringstream os;
+        os << "Error in FFTJetChannelSelector::select: "
+           << "FFTJet sequencer returned with status " << status;
+        throw std::runtime_error(os.str());
+    }
+    std::sort(recoJets_.begin(), recoJets_.end(), LocalSortByPt());
+
+    // Figure out which jets satisfy selection cuts
+    const unsigned nJets = recoJets_.size();
+    jetEta_.clear();
+    jetEta_.reserve(nJets);
+    jetPhi_.clear();
+    jetPhi_.reserve(nJets);
+    for (unsigned ijet=0; ijet<nJets; ++ijet)
+    {
+        const VectorLike& p4(recoJets_[ijet].vec());
+        if (p4.Pt() > jetPtCutoff_)
+        {
+            jetEta_.push_back(p4.Eta());
+            jetPhi_.push_back(p4.Phi());
+        }
+    }
+    const unsigned nGoodJ = jetEta_.size();
+
+    // Cycle over all channels again and see if the channel is close
+    // to some jet which passes the jet selection cuts
+    for (int i=0; i<event.PulseCount; ++i)
+    {
+        const unsigned chNum = event.getHBHEChannelNumber(i);
+        const TVector3& dir(geometry_.getDirection(chNum));
+        const double eta = dir.Eta();
+        const double phi = dir.Phi();
+        unsigned char isClose = 0;
+        for (unsigned ijet=0; ijet<nGoodJ && !isClose; ++ijet)
+        {
+            const double dEta = (eta - jetEta_[ijet])/etaConeSize_;
+            const double dPhi = nta::deltaPhi(phi, jetPhi_[ijet])/phiConeSize_;
+            isClose = dEta*dEta + dPhi*dPhi < 1.0;
+        }
+        mask->push_back(isClose);
+    }
+}

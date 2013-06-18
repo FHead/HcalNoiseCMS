@@ -15,6 +15,7 @@
 
 #include "Functors.h"
 #include "time_stamp.h"
+#include "FFTJetChannelSelector.h"
 
 #include "geners/BinaryFileArchive.hh"
 #include "geners/GenericIO.hh"
@@ -37,19 +38,37 @@ MixedChargeAnalysis<Options,RootMadeClass>::MixedChargeAnalysis(
                        opts.heGeometryFile.c_str()),
       channelSelector_(0),
       channelSelectionMask_(HBHEChannelMap::ChannelCount, 1U),
-      mixManager_(new ChargeMixingManager<RootMadeClass>(
-                      opts.objConfigFile, verbose)),
+      mixManager_(0),
       mixInfo_(opts.mixExtraChannels, opts.centralTS),
       rng_(0),
       channelAr_(0),
       channelNtuple_(0)
 {
+    if (!options_.disableChargeMixing)
+        mixManager_ = new ChargeMixingManager<RootMadeClass>(
+            opts.objConfigFile, verbose);
+
     if (opts.randomSeed)
         rng_ = new npstat::MersenneTwister(opts.randomSeed);
     else
         // Default constructor will pick the RNG seed from /dev/urandom
         rng_ = new npstat::MersenneTwister();
 
+    // Initialize channel selector
+    const unsigned nPhiBins = 128;
+    const unsigned nEtaBins = 256;
+    const double etaMax = 2.0*M_PI;
+    const double etaMin = -etaMax;
+    channelSelector_ = new FFTJetChannelSelector<MyType>(
+        channelGeometry_, nEtaBins, etaMin, etaMax, nPhiBins,
+        opts.pattRecoScale, opts.etaToPhiBandwidthRatio,
+        opts.coneSize, opts.peakEtCutoff, opts.jetPtCutoff);
+
+    // Zero out various arrays whose filling may be skipped
+    memset(readoutsMixed_, 0, sizeof(readoutsMixed_));
+    memset(chargeAdded_, 0, sizeof(chargeAdded_));
+    memset(preChargeAdded_, 0, sizeof(preChargeAdded_));
+    memset(postChargeAdded_, 0, sizeof(postChargeAdded_));
     memset(chargeReconstructed_, 0, sizeof(chargeReconstructed_));
 }
 
@@ -57,9 +76,9 @@ MixedChargeAnalysis<Options,RootMadeClass>::MixedChargeAnalysis(
 template <class Options, class RootMadeClass>
 MixedChargeAnalysis<Options,RootMadeClass>::~MixedChargeAnalysis()
 {
+    delete channelSelector_;
     delete rng_;
     delete mixManager_;
-    delete channelSelector_;
 }
 
     
@@ -100,56 +119,59 @@ int MixedChargeAnalysis<Options,RootMadeClass>::beginJob()
     if (verbose_)
         std::cout << "Analysis options are: " << options_ << std::endl;
 
-    // Try to open the archive for storing the mixed charge data
-    if (!options_.channelArchive.empty())
+    if (!options_.disableChargeMixing)
     {
-        channelAr_ = new gs::BinaryFileArchive(options_.channelArchive.c_str(),
-                                               "w:z=z");
-        if (!channelAr_->isOpen())
+        // Try to open the archive for storing the mixed charge data
+        if (!options_.channelArchive.empty())
         {
-            std::cerr << "Failed to open archive \"" << options_.channelArchive
-                      << "\" for writing" << std::endl;
-            return 1;
+            channelAr_ = new gs::BinaryFileArchive(options_.channelArchive.c_str(),
+                                                   "w:z=z");
+            if (!channelAr_->isOpen())
+            {
+                std::cerr << "Failed to open archive \"" << options_.channelArchive
+                          << "\" for writing" << std::endl;
+                return 1;
+            }
+
+            const char* title = "Mixed Charge Ntuple";
+            channelNtuple_ = new npstat::ArchivedNtuple<ChannelChargeMix>(
+                npstat::ntupleColumns("MixedCharge"), title,
+                *channelAr_, title, "", 1000000/sizeof(ChannelChargeMix));
         }
 
-        const char* title = "Mixed Charge Ntuple";
-        channelNtuple_ = new npstat::ArchivedNtuple<ChannelChargeMix>(
-            npstat::ntupleColumns("MixedCharge"), title,
-            *channelAr_, title, "", 1000000/sizeof(ChannelChargeMix));
-    }
-
-    // Load the charge determination filters
-    if (!options_.filterFile.empty())
-    {
-        std::ifstream is(options_.filterFile.c_str(), std::ios::binary);
-        gs::restore_item(is, &filters);
-        if (filters.size() != HBHEChannelMap::ChannelCount)
+        // Load the charge determination filters
+        if (!options_.filterFile.empty())
         {
-            std::cerr << "Failed to read filters from file \""
-                      << options_.filterFile << "\"." << std::endl;
-            return 1;
+            std::ifstream is(options_.filterFile.c_str(), std::ios::binary);
+            gs::restore_item(is, &filters);
+            if (filters.size() != HBHEChannelMap::ChannelCount)
+            {
+                std::cerr << "Failed to read filters from file \""
+                          << options_.filterFile << "\"." << std::endl;
+                return 1;
+            }
         }
-    }
 
-    // Load events used for charge mixing
-    if (verbose_)
-    {
-        std::cout << "Loading events for charge mixing... ";
-        std::cout.flush();
-    }        
-    TChain* chain = dynamic_cast<TChain*>(this->fChain);
-    assert(chain);
-    if (!mixManager_->loadEventsToMix(options_.mixListFile,
-                                      chain->GetName(), channelMap_))
-    {
+        // Load events used for charge mixing
         if (verbose_)
-            std::cout << "Failed" << std::endl;
-        return 1;
-    }
-    if (verbose_)
-    {
-        std::cout << "Done\n";
-        std::cout.flush();
+        {
+            std::cout << "Loading events for charge mixing... ";
+            std::cout.flush();
+        }        
+        TChain* chain = dynamic_cast<TChain*>(this->fChain);
+        assert(chain);
+        if (!mixManager_->loadEventsToMix(options_.mixListFile,
+                                          chain->GetName(), channelMap_))
+        {
+            if (verbose_)
+                std::cout << "Failed" << std::endl;
+            return 1;
+        }
+        if (verbose_)
+        {
+            std::cout << "Done\n";
+            std::cout.flush();
+        }
     }
 
     // Book histograms
@@ -164,6 +186,7 @@ int MixedChargeAnalysis<Options,RootMadeClass>::beginJob()
 template <class Options, class RootMadeClass>
 int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
 {
+    // Cycle over channel data before mixing the charge
     for (Int_t i=0; i<this->PulseCount; ++i)
     {
         // Determine and remember the channel number for the given "pulse"
@@ -186,49 +209,54 @@ int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
 
     // Select "good" channels
     if (channelSelector_)
-        channelSelector_->select(*this, &channelSelectionMask_);
-
-    // Cycle over channel data before mixing the charge
-    // Mix the extra charge
-    // const int numAllChannels = mixExtraCharge();
-    mixExtraCharge();
-
-    // Cycle over channel data after mixing the charge
-    for (Int_t i=0; i<this->PulseCount; ++i)
     {
-        // Figure out how many pulses will be mixed for this channel
-        const unsigned chNum = channelNumber_[i];
-        readoutsMixed_[i] = mixInfo_.addedReadouts[chNum];
+        channelSelector_->select(*this, &channelSelectionMask_);
+        fillJetSummary(&jetSummary_);
+    }
 
-        // Figure out how much charge was added
-        const double* charge = &this->Charge[i][0];
+    if (!options_.disableChargeMixing)
+    {
+        // Mix the extra charge
+        // const int numAllChannels = mixExtraCharge();
+        mixExtraCharge();
 
-        const double chargeAfterMixing = std::accumulate(
-            charge+options_.minResponseTS, charge+options_.maxResponseTS, 0.0);
-        chargeAdded_[i] = chargeAfterMixing - chargeBeforeMixing_[i];
-
-        const double preAfterMixing = std::accumulate(
-            charge+options_.minPreTS, charge+options_.maxPreTS, 0.0);
-        preChargeAdded_[i] = preAfterMixing - preCharge_[i];
-
-        const double postAfterMixing = std::accumulate(
-            charge+options_.minPostTS, charge+options_.maxPostTS, 0.0);
-        postChargeAdded_[i] = postAfterMixing - postCharge_[i];
-
-        // Fill out the channel-by-channel information for subsequent fitting
-        if (channelNtuple_ && channelSelectionMask_[i])
+        // Cycle over channel data after mixing the charge
+        for (Int_t i=0; i<this->PulseCount; ++i)
         {
-            ChannelChargeMix mix(*this, mixInfo_,
-                                 chargeBeforeMixing_[i], i, chNum);
-            channelNtuple_->fill(mix);
-        }
+            // Figure out how many pulses will be mixed for this channel
+            const unsigned chNum = channelNumber_[i];
+            readoutsMixed_[i] = mixInfo_.addedReadouts[chNum];
 
-        // Invoke the filter
-        if (!filters.empty())
-        {
-            const HcalChargeFilter& filter(filters[chNum]);
-            if (filter.isValid())
-                chargeReconstructed_[i] = filter(charge, 10U);
+            // Figure out how much charge was added
+            const double* charge = &this->Charge[i][0];
+
+            const double chargeAfterMixing = std::accumulate(
+                charge+options_.minResponseTS, charge+options_.maxResponseTS, 0.0);
+            chargeAdded_[i] = chargeAfterMixing - chargeBeforeMixing_[i];
+
+            const double preAfterMixing = std::accumulate(
+                charge+options_.minPreTS, charge+options_.maxPreTS, 0.0);
+            preChargeAdded_[i] = preAfterMixing - preCharge_[i];
+
+            const double postAfterMixing = std::accumulate(
+                charge+options_.minPostTS, charge+options_.maxPostTS, 0.0);
+            postChargeAdded_[i] = postAfterMixing - postCharge_[i];
+
+            // Fill out the channel-by-channel information for subsequent fitting
+            if (channelNtuple_ && channelSelectionMask_[i])
+            {
+                ChannelChargeMix mix(*this, mixInfo_,
+                                     chargeBeforeMixing_[i], i, chNum);
+                channelNtuple_->fill(mix);
+            }
+
+            // Invoke the filter
+            if (!filters.empty())
+            {
+                const HcalChargeFilter& filter(filters[chNum]);
+                if (filter.isValid())
+                    chargeReconstructed_[i] = filter(charge, 10U);
+            }
         }
     }
 
@@ -266,6 +294,45 @@ void MixedChargeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                                 "1-d", "Dummy", "Events",
                                 1, 0.0, 1.0, Double(0.5), Double(1)));
 
+    FFTJetChannelSelector<MyType>* sel = 
+        dynamic_cast<FFTJetChannelSelector<MyType>*>(channelSelector_);
+    if (sel && manager_.isRequested("JetNtuple"))
+        manager_.manage(AutoNtuple("JetNtuple", "Jet Summary Ntuple", "",
+                 std::make_tuple(
+                     TreeDatum(JetCount20),
+                     TreeDatum(JetCount30),
+                     TreeDatum(JetCount50),
+                     TreeDatum(JetCount100),
+                     TreeDatum(LeadingJetEta),
+                     TreeDatum(LeadingJetPhi),
+                     TreeDatum(LeadingJetPt),
+                     TreeDatum(LeadingJetHad),
+                     TreeDatum(LeadingJetEM),
+                     Column("LeadingJetHadFraction",
+                            Method(&MyType::leadingJetHadFraction, this)),
+                     TreeDatum(FollowingJetEta),
+                     TreeDatum(FollowingJetPhi),
+                     TreeDatum(FollowingJetPt),
+                     TreeDatum(FollowingJetHad),
+                     TreeDatum(FollowingJetEM),
+                     Column("FollowingJetHadFraction",
+                            Method(&MyType::followingJetHadFraction, this)),
+                     TreeDatum(OfficialDecision),
+                     Column("FFTJetsMade",        ValueOf(jetSummary_.NJetsMade)),
+                     Column("FFTJetsUsed",        ValueOf(jetSummary_.NJetsUsed)),
+                     Column("FFTJetCount20",      ValueOf(jetSummary_.JetCount20)),
+                     Column("FFTJetCount30",      ValueOf(jetSummary_.JetCount30)),
+                     Column("FFTJetCount50",      ValueOf(jetSummary_.JetCount50)),
+                     Column("FFTJetCount100",     ValueOf(jetSummary_.JetCount100)),
+                     Column("FFTLeadingJetEta",   ValueOf(jetSummary_.LeadingJetEta)),
+                     Column("FFTLeadingJetPhi",   ValueOf(jetSummary_.LeadingJetPhi)),
+                     Column("FFTLeadingJetPt",    ValueOf(jetSummary_.LeadingJetPt)),
+                     Column("FFTFollowingJetEta", ValueOf(jetSummary_.FollowingJetEta)),
+                     Column("FFTFollowingJetPhi", ValueOf(jetSummary_.FollowingJetPhi)),
+                     Column("FFTFollowingJetPt",  ValueOf(jetSummary_.FollowingJetPt)),
+                     Column("FFTEtSum",           ValueOf(jetSummary_.EtSum)),
+                     Column("FFTEtFractionUsed",  ValueOf(jetSummary_.EtFractionUsed))
+                 )));
     //
     // Managed histograms in the TS group.
     // These histos will be filled 10 times per event.
@@ -297,7 +364,7 @@ void MixedChargeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                            ElementOf(this->readoutsMixed_),
                            Double(1)), "HBHE");
 
-    if (manager_.isRequested("filteredQNtuple"))
+    if (manager_.isRequested("FilteredQNtuple"))
         manager_.manage(CycledNtuple("FilteredChannelCharge",
                                      "Filtered Channel Charge", "HBHE",
                  std::make_tuple(
@@ -332,6 +399,80 @@ void MixedChargeAnalysis<Options,RootMadeClass>::fillManagedHistograms()
 template <class Options, class RootMadeClass>
 int MixedChargeAnalysis<Options,RootMadeClass>::mixExtraCharge()
 {
+    assert(mixManager_);
     mixManager_->prepareMix(*rng_, channelMap_, &mixInfo_);
     return mixInfo_.mixWithData<RootMadeClass>(channelMap_, this);
+}
+
+template <class Options, class RootMadeClass>
+double MixedChargeAnalysis<Options,RootMadeClass>::leadingJetHadFraction() const
+{
+    if (this->LeadingJetPt > 0.0)
+    {
+        const double e = this->LeadingJetPt*cosh(this->LeadingJetEta);
+        return this->LeadingJetHad/e;
+    }
+    else
+        return 0.0;
+}
+
+template <class Options, class RootMadeClass>
+double MixedChargeAnalysis<Options,RootMadeClass>::followingJetHadFraction() const
+{
+    if (this->FollowingJetPt > 0.0)
+    {
+        const double e = this->FollowingJetPt*cosh(this->FollowingJetEta);
+        return this->FollowingJetHad/e;
+    }
+    else
+        return 0.0;
+}
+
+template <class Options, class RootMadeClass>
+void MixedChargeAnalysis<Options,RootMadeClass>::fillJetSummary(
+    JetSummary* summary)
+{
+    typedef typename FFTJetChannelSelector<MyType>::Jet Jet;
+
+    FFTJetChannelSelector<MyType>* sel = 
+        dynamic_cast<FFTJetChannelSelector<MyType>*>(channelSelector_);
+    if (sel)
+    {
+        static const JetSummary dummySummary;
+        assert(summary);
+        *summary = dummySummary;
+
+        const std::vector<Jet>& jets(sel->getJets());
+        summary->NJetsMade = jets.size();
+        summary->NJetsUsed = sel->nGoodJets();
+        for (unsigned i=0; i<summary->NJetsMade; ++i)
+        {
+            const double pt = jets[i].vec().Pt();
+            if (pt > 20.0)
+                summary->JetCount20++;
+            if (pt > 30.0)
+                summary->JetCount30++;
+            if (pt > 50.0)
+                summary->JetCount50++;
+            if (pt > 100.0)
+                summary->JetCount100++;
+        }
+        if (summary->NJetsMade > 0)
+        {
+            const VectorLike& p4(jets[0].vec());
+            summary->LeadingJetEta = p4.Eta();
+            summary->LeadingJetPhi = p4.Phi();
+            summary->LeadingJetPt = p4.Pt();
+        }
+        if (summary->NJetsMade > 1)
+        {
+            const VectorLike& p4(jets[1].vec());
+            summary->FollowingJetEta = p4.Eta();
+            summary->FollowingJetPhi = p4.Phi();
+            summary->FollowingJetPt = p4.Pt();
+        }
+        summary->EtSum = sel->sumEt();
+        if (summary->EtSum > 0.0)
+            summary->EtFractionUsed = (summary->EtSum - sel->unusedEt())/summary->EtSum;
+    }
 }

@@ -19,6 +19,7 @@
 #include "HcalChargeFilter.h"
 #include "AbsChannelSelector.h"
 #include "HBHEChannelGeometry.h"
+#include "JetSummary.h"
 
 #include "geners/AbsArchive.hh"
 
@@ -92,6 +93,11 @@ public:
     // number).
     virtual Bool_t Notify();
     virtual Int_t Cut(Long64_t entryNumber);
+
+    // Channel number. Note that calling this method only makes sense
+    // after "channelNumber" array has been filled.
+    inline unsigned getHBHEChannelNumber(const unsigned pulseNumber) const
+        {return channelNumber_[pulseNumber];}
 
 protected:
     //
@@ -178,6 +184,9 @@ private:
     // Charge reconstructed by the filter (up to this->PulseCount)
     double chargeReconstructed_[HBHEChannelMap::ChannelCount];
 
+    // Summary for the locally reconstructed jets
+    JetSummary jetSummary_;
+
     // Archive for writing out the channel data
     gs::AbsArchive* channelAr_;
 
@@ -187,6 +196,13 @@ private:
     // Method to call in order to perform charge mixing.
     // Returns the number of channels in the combined event.
     int mixExtraCharge();
+
+    // Method to fill the jet summary
+    void fillJetSummary(JetSummary* summary);
+
+    // Some methods used for ntuple filling
+    double leadingJetHadFraction() const;
+    double followingJetHadFraction() const;
 };
 
 #include "MixedChargeAnalysis.icc"

@@ -18,7 +18,7 @@ struct AbsChannelSelector
     // for selected channels and to 0 for channels which should be dropped
     //
     virtual void select(const AnalysisClass& event,
-                        std::vector<unsigned char>* mask) const = 0;
+                        std::vector<unsigned char>* mask) = 0;
 };
 
 //
@@ -33,7 +33,7 @@ struct AllChannelSelector : public AbsChannelSelector<AnalysisClass>
     inline virtual ~AllChannelSelector() {}
 
     inline virtual void select(const AnalysisClass& event,
-                               std::vector<unsigned char>* mask) const
+                               std::vector<unsigned char>* mask)
     {
         assert(mask);
         mask->resize(event.PulseCount);

@@ -29,7 +29,7 @@ NPSTAT_LIB = $(NPSTAT_DIR)/lib
 NPSTAT_INC = $(NPSTAT_DIR)/include
 
 LIBS = $(ROOTLIBS) -L$(NPSTAT_LIB) -L/usr/lib64 -lnpstat -llapack -lblas \
-        -lfftw3 -lgeners -lbz2 -lz -ldl -lm
+        -lfftjet -lfftw3 -lgeners -lbz2 -lz -ldl -lm
 
 CXXFLAGS = -fPIC -Wall -g -std=c++0x $(ROOTCFLAGS) -I$(NPSTAT_INC) -I.
 LINKFLAGS = -fPIC -g -std=c++0x

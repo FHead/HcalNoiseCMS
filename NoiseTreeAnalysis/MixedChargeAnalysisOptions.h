@@ -47,6 +47,11 @@ struct MixedChargeAnalysisOptions
     MixedChargeAnalysisOptions()
         : hbGeometryFile("Geometry/hb.ctr"),
           heGeometryFile("Geometry/he.ctr"),
+          pattRecoScale(0.2),
+          etaToPhiBandwidthRatio(1.0),
+          coneSize(0.5),
+          peakEtCutoff(5.0),
+          jetPtCutoff(20.0),
           randomSeed(0UL),
           centralTS(4),
           minResponseTS(4),
@@ -60,11 +65,29 @@ struct MixedChargeAnalysisOptions
 
     void parse(CmdLine& cmdline)
     {
-        cmdline.require("-c", "--configFile") >> objConfigFile;
-        cmdline.require("-m", "--mixFile") >> mixListFile;
+        mixExtraChannels = cmdline.has("-e", "--mixExtra");
+        disableChargeMixing = cmdline.has(NULL, "--disableChargeMixing");
+
+        if (disableChargeMixing)
+        {
+            cmdline.option("-c", "--configFile") >> objConfigFile;
+            cmdline.option("-m", "--mixFile") >> mixListFile;
+        }
+        else
+        {
+            cmdline.require("-c", "--configFile") >> objConfigFile;
+            cmdline.require("-m", "--mixFile") >> mixListFile;
+        }
 
         cmdline.option(NULL, "--hbgeo") >> hbGeometryFile;
         cmdline.option(NULL, "--hegeo") >> heGeometryFile;
+
+        cmdline.option(NULL, "--pattRecoScale") >> pattRecoScale;
+        cmdline.option(NULL, "--etaToPhiBandwidthRatio") >> etaToPhiBandwidthRatio;
+        cmdline.option(NULL, "--coneSize") >> coneSize;
+        cmdline.option(NULL, "--peakEtCutoff") >> peakEtCutoff;
+        cmdline.option(NULL, "--jetPtCutoff") >> jetPtCutoff;
+
         cmdline.option("-r", "--randomSeed") >> randomSeed;
         cmdline.option(NULL, "--filterFile") >> filterFile;
         cmdline.option(NULL, "--channelArchive") >> channelArchive;
@@ -76,8 +99,6 @@ struct MixedChargeAnalysisOptions
         cmdline.option(NULL, "--minPostTS") >> minPostTS;
         cmdline.option(NULL, "--maxPostTS") >> maxPostTS;
 
-        mixExtraChannels = cmdline.has("-e", "--mixExtra");
-
         validateRangeLELT(minResponseTS, "minResponseTS", 0U, 9U);
         validateRangeLELT(maxResponseTS, "maxResponseTS", minResponseTS+1U, 10U);
     }
@@ -85,8 +106,14 @@ struct MixedChargeAnalysisOptions
     void listOptions(std::ostream& os) const
     {
         os << "-c configFile -m mixFile [-r randomSeed] [-e]"
+           << " [--disableChargeMixing]"
            << " [--hbgeo filename]"
            << " [--hegeo filename]"
+           << " [--pattRecoScale value]"
+           << " [--etaToPhiBandwidthRatio value]"
+           << " [--coneSize value]"
+           << " [--peakEtCutoff value]"
+           << " [--jetPtCutoff value]"
            << " [--filterFile filename]"
            << " [--channelArchive archiveName]"
            << " [--centralTS value]"
@@ -130,6 +157,16 @@ struct MixedChargeAnalysisOptions
            << "                     will be written for subsequent filter fitting by the\n"
            << "                     \"buildOptimalFilters\" program.  By default, no such\n"
            << "                     archive is created.\n\n";
+        os << " --pattRecoScale     Pattern recognition scale for FFTJet jet reconstruction.\n"
+           << "                     Default value is 0.2.\n\n";
+        os << " --etaToPhiBandwidthRatio   Eta/phi pattern recognition bandwidth ratio and\n"
+           << "                            cone axis ratio for FFTJet. Default value is 1.0.\n\n";
+        os << " --coneSize          Geometric mean of eta-phi cone axes for jet\n"
+           << "                     reconstruction. Default is 0.5.\n\n";
+        os << " --peakEtCutoff      Peak magnitude cutoff (local Et) for jet reconstruction.\n"
+           << "                     Default is 5.0.\n\n";
+        os << " --jetPtCutoff       Minimum transverse momentum for \"good\" jets. Default\n"
+           << "                     value is 20.0.\n\n";
         os << " --centralTS         The \"central\" time slice (default is 4). The program\n"
            << "                     will check that the generated time shifts will not move\n"
            << "                     the central TS outside of observable range.\n\n";
@@ -145,6 +182,8 @@ struct MixedChargeAnalysisOptions
            << "                     before and after mixing.\n\n";
         os << " --maxPostTS         Maximum time slice (excluded) for defining \"post charge\"\n"
            << "                     before and after mixing.\n\n";
+        os << " --disableChargeMixing   Disable all code related to charge mixing. This option\n"
+           << "                         can be useful for testing purposes.\n\n";
     }
 
     std::string hbGeometryFile;
@@ -153,6 +192,13 @@ struct MixedChargeAnalysisOptions
     std::string mixListFile;
     std::string filterFile;
     std::string channelArchive;
+
+    double pattRecoScale;
+    double etaToPhiBandwidthRatio;
+    double coneSize;
+    double peakEtCutoff;
+    double jetPtCutoff;
+
     unsigned long randomSeed;
     int centralTS;
     unsigned minResponseTS;
@@ -162,6 +208,7 @@ struct MixedChargeAnalysisOptions
     unsigned minPostTS;
     unsigned maxPostTS;
     bool mixExtraChannels;
+    bool disableChargeMixing;
 };
 
 std::ostream& operator<<(std::ostream& os, const MixedChargeAnalysisOptions& o)
@@ -172,6 +219,11 @@ std::ostream& operator<<(std::ostream& os, const MixedChargeAnalysisOptions& o)
        << ", mixFile = \"" << o.mixListFile << '"'
        << ", filterFile = \"" << o.filterFile << '"'
        << ", channelArchive = \"" << o.channelArchive << '"'
+       << ", pattRecoScale = \"" << o.pattRecoScale << '"'
+       << ", etaToPhiBandwidthRatio = \"" << o.etaToPhiBandwidthRatio << '"'
+       << ", coneSize = \"" << o.coneSize << '"'
+       << ", peakEtCutoff = \"" << o.peakEtCutoff << '"'
+       << ", jetPtCutoff = \"" << o.jetPtCutoff << '"'
        << ", randomSeed = " << o.randomSeed
        << ", centralTS = " << o.centralTS
        << ", minResponseTS = " << o.minResponseTS
@@ -181,6 +233,7 @@ std::ostream& operator<<(std::ostream& os, const MixedChargeAnalysisOptions& o)
        << ", minPostTS = " << o.minPostTS
        << ", maxPostTS = " << o.maxPostTS
        << ", mixExtraChannels = " << o.mixExtraChannels
+       << ", disableChargeMixing = " << o.disableChargeMixing
         ;
     return os;
 }
