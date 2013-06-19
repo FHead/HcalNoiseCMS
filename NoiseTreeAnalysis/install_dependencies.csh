@@ -67,4 +67,4 @@ foreach package ($geners_package $fftjet_package $npstat_package)
 end
 
 echo
-echo Succesfully installed $geners_package $fftjet_package $npstat_package
+echo Successfully installed $geners_package $fftjet_package $npstat_package
