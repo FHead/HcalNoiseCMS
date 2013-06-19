@@ -84,7 +84,11 @@ MixedChargeAnalysis<Options,RootMadeClass>::MixedChargeAnalysis(
         rng_ = new npstat::MersenneTwister();
 
     // Zero out various arrays whose filling may be skipped
+    // depending on the values of configuration options
     memset(readoutsMixed_, 0, sizeof(readoutsMixed_));
+    memset(readoutsMixedCenter_, 0, sizeof(readoutsMixedCenter_));
+    memset(readoutsMixedPre_, 0, sizeof(readoutsMixedPre_));
+    memset(readoutsMixedPost_, 0, sizeof(readoutsMixedPost_));
     memset(chargeAdded_, 0, sizeof(chargeAdded_));
     memset(preChargeAdded_, 0, sizeof(preChargeAdded_));
     memset(postChargeAdded_, 0, sizeof(postChargeAdded_));
@@ -224,6 +228,7 @@ int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
         fillJetSummary(&jetSummary_);
     }
 
+    // Code which depends on charge mixing
     if (!options_.disableChargeMixing)
     {
         // Mix the extra charge
@@ -233,9 +238,19 @@ int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
         // Cycle over channel data after mixing the charge
         for (Int_t i=0; i<this->PulseCount; ++i)
         {
-            // Figure out how many pulses will be mixed for this channel
+            // Figure out how many pulses have been mixed for this channel
+            // using the indexing by "pulse number"
             const unsigned chNum = channelNumber_[i];
             readoutsMixed_[i] = mixInfo_.addedReadouts[chNum];
+
+            const unsigned* nts = &mixInfo_.addedReadoutsTS[chNum][0];
+
+            readoutsMixedCenter_[i] = std::accumulate(
+                nts + options_.minResponseTS, nts + options_.maxResponseTS, 0U);
+            readoutsMixedPre_[i] = std::accumulate(
+                nts + options_.minPreTS, nts + options_.maxPreTS, 0U);
+            readoutsMixedPost_[i] = std::accumulate(
+                nts + options_.minPostTS, nts + options_.maxPostTS, 0U);
 
             // Figure out how much charge was added
             const double* charge = &this->Charge[i][0];
@@ -304,6 +319,11 @@ void MixedChargeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                                 "1-d", "Dummy", "Events",
                                 1, 0.0, 1.0, Double(0.5), Double(1)));
 
+    //
+    // Special ntuple for studying jet reconstruction channel selector.
+    // One entry per event, can be used to compare the information
+    // about two leading HBHE jets with two leading jets from CMSSW.
+    //
     FFTJetChannelSelector<MyType>* sel = 
         dynamic_cast<FFTJetChannelSelector<MyType>*>(channelSelector_);
     if (sel && manager_.isRequested("JetNtuple"))
@@ -343,6 +363,7 @@ void MixedChargeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                      Column("FFTEtSum",           ValueOf(jetSummary_.EtSum)),
                      Column("FFTEtFractionUsed",  ValueOf(jetSummary_.EtFractionUsed))
                  )));
+
     //
     // Managed histograms in the TS group.
     // These histos will be filled 10 times per event.
@@ -367,30 +388,43 @@ void MixedChargeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
     // Managed histograms and ntuples in the HBHE group.
     // These items will be filled "PulseCount" times per event.
     //
-    if (manager_.isRequested("MixedReadouts"))
-        manager_.manage(CycledH1D("MixedReadouts", "Number of Mixed Readouts",
-                           "HBHE", "Readouts Mixed", "Channels",
-                           200, -0.5, 199.5,
-                           ElementOf(this->readoutsMixed_),
-                           Double(1)), "HBHE");
-
-    if (manager_.isRequested("FilteredQNtuple"))
-        manager_.manage(CycledNtuple("FilteredChannelCharge",
-                                     "Filtered Channel Charge", "HBHE",
+    if (manager_.isRequested("ChannelQNtuple"))
+    {
+        if (!options_.disableChargeMixing)
+            manager_.manage(CycledNtuple("ChannelQNtuple",
+                                         "Channel Charge", "HBHE",
                  std::make_tuple(
                      Column("ChannelNumber",   ElementOf(channelNumber_)),
                      Column("Energy",          ElementOf(this->Energy)),
                      Column("RecHitTime",      ElementOf(this->RecHitTime)),
                      Column("selected",        ElementOf(channelSelectionMask_)),
                      Column("charge",          ElementOf(chargeBeforeMixing_)),
-                     Column("chargeReco",      ElementOf(chargeReconstructed_)),
-                     Column("chargeAdded",     ElementOf(chargeAdded_)),
                      Column("preCharge",       ElementOf(preCharge_)),
-                     Column("preChargeAdded",  ElementOf(preChargeAdded_)),
                      Column("postCharge",      ElementOf(postCharge_)),
+                     Column("chargeAdded",     ElementOf(chargeAdded_)),
+                     Column("preChargeAdded",  ElementOf(preChargeAdded_)),
                      Column("postChargeAdded", ElementOf(postChargeAdded_)),
-                     Column("readoutsMixed",   ElementOf(readoutsMixed_))
+                     Column("chargeReconstructed", ElementOf(chargeReconstructed_)),
+                     Column("readoutsMixedTotal",  ElementOf(readoutsMixed_)),
+                     Column("readoutsMixedCenter", ElementOf(readoutsMixedCenter_)),
+                     Column("readoutsMixedPre",    ElementOf(readoutsMixedPre_)),
+                     Column("readoutsMixedPost",   ElementOf(readoutsMixedPost_))
                  )), "HBHE");
+        else
+            // No point in collecting zeros for variables which
+            // are not filled without charge mixing
+            manager_.manage(CycledNtuple("ChannelQNtuple",
+                                         "Channel Charge", "HBHE",
+                 std::make_tuple(
+                     Column("ChannelNumber",   ElementOf(channelNumber_)),
+                     Column("Energy",          ElementOf(this->Energy)),
+                     Column("RecHitTime",      ElementOf(this->RecHitTime)),
+                     Column("selected",        ElementOf(channelSelectionMask_)),
+                     Column("charge",          ElementOf(chargeBeforeMixing_)),
+                     Column("preCharge",       ElementOf(preCharge_)),
+                     Column("postCharge",      ElementOf(postCharge_))
+                 )), "HBHE");
+    }
 }
 
 

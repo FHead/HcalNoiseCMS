@@ -168,8 +168,13 @@ private:
     // Linearized channel number (index valid up to this->PulseCount)
     unsigned channelNumber_[HBHEChannelMap::ChannelCount];
 
-    // Number of readouts mixed with the channel (up to this->PulseCount)
+    // Total number of readouts mixed with the channel (up to this->PulseCount)
     unsigned readoutsMixed_[HBHEChannelMap::ChannelCount];
+
+    // Number of readouts mixed in the center zone and in the sidebands
+    unsigned readoutsMixedCenter_[HBHEChannelMap::ChannelCount];
+    unsigned readoutsMixedPre_[HBHEChannelMap::ChannelCount];
+    unsigned readoutsMixedPost_[HBHEChannelMap::ChannelCount];
 
     // Charge before mixing and charge added (up to this->PulseCount)
     double chargeBeforeMixing_[HBHEChannelMap::ChannelCount];
