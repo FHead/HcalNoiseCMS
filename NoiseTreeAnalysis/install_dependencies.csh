@@ -53,7 +53,9 @@ setenv PKG_CONFIG_PATH ${HOME}/local/lib/pkgconfig
 
 # Install the packages
 foreach package ($geners_package $fftjet_package $npstat_package)
-    echo Installing $package
+    echo
+    echo **** Installing $package ****
+    echo
     cd ${HOME}/local/src
     tar -xzf ${package}.tar.gz
     rm -f ${package}.tar.gz
@@ -63,3 +65,6 @@ foreach package ($geners_package $fftjet_package $npstat_package)
     make check
     make install
 end
+
+echo
+echo Succesfully installed $geners_package $fftjet_package $npstat_package
