@@ -1,4 +1,6 @@
-# If you plan to install this software using compilers distributed
+# Run this script with tcsh (or source it in your interactive tcsh session).
+#
+# If you plan to install the software using compilers distributed
 # with CMSSW (for example, in order to get the exact root version
 # from the release), make sure to set up the appropriate CMSSW
 # environment before running this script.
@@ -54,7 +56,7 @@ setenv PKG_CONFIG_PATH ${HOME}/local/lib/pkgconfig
 # Install the packages
 foreach package ($geners_package $fftjet_package $npstat_package)
     echo
-    echo **** Installing $package ****
+    echo '**** Installing' $package '****'
     echo
     cd ${HOME}/local/src
     tar -xzf ${package}.tar.gz
