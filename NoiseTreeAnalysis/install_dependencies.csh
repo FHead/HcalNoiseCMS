@@ -29,6 +29,7 @@ set npstat_package = npstat-${npstat_version}
 # Download the software packages to install
 mkdir -p ${HOME}/local/src
 cd ${HOME}/local/src
+rm -f ${geners_package}.tar.gz ${fftjet_package}.tar.gz ${npstat_package}.tar.gz
 wget http://www.hepforge.org/archive/geners/${geners_package}.tar.gz
 wget http://www.hepforge.org/archive/fftjet/${fftjet_package}.tar.gz
 wget http://www.hepforge.org/archive/npstat/${npstat_package}.tar.gz
@@ -36,7 +37,7 @@ wget http://www.hepforge.org/archive/npstat/${npstat_package}.tar.gz
 # Uninstall and cleanup previous versions of the software
 foreach dir (geners-*.*.* fftjet-*.*.* npstat-*.*.*)
     cd ${HOME}/local/src
-    if (-d $dir)
+    if (-d $dir) then
         echo Uninstalling $dir
         cd $dir
         make uninstall
