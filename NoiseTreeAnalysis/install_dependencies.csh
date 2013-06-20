@@ -22,7 +22,7 @@
 # Package versions
 set geners_version = 1.3.0
 set fftjet_version = 1.4.1
-set npstat_version = 2.0.0
+set npstat_version = 2.1.0
 
 set geners_package = geners-${geners_version}
 set fftjet_package = fftjet-${fftjet_version}
