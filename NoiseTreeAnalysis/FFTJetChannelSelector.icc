@@ -2,6 +2,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <algorithm>
+#include <cfloat>
 
 #include "deltaPhi.h"
 
@@ -49,12 +50,18 @@ FFTJetChannelSelector<AnalysisClass>::FFTJetChannelSelector(
 
 template <class AnalysisClass>
 void FFTJetChannelSelector<AnalysisClass>::select(
-    const AnalysisClass& event,
-    std::vector<unsigned char>* mask)
+    const AnalysisClass& event, std::vector<unsigned char>* mask,
+    std::vector<double>* parentPt)
 {
     assert(mask);
     mask->clear();
     mask->reserve(event.PulseCount);
+
+    if (parentPt)
+    {
+        parentPt->clear();
+        parentPt->reserve(event.PulseCount);
+    }
 
     // Discretize event energy flow
     calo_.reset();
@@ -85,8 +92,10 @@ void FFTJetChannelSelector<AnalysisClass>::select(
     }
     std::sort(recoJets_.begin(), recoJets_.end(), LocalSortByPt());
 
-    // Figure out which jets satisfy selection cuts
+    // Save Pt, eta, and phi into some arrays for fast access
     const unsigned nJets = recoJets_.size();
+    jetPt_.clear();
+    jetPt_.reserve(nJets);
     jetEta_.clear();
     jetEta_.reserve(nJets);
     jetPhi_.clear();
@@ -94,29 +103,57 @@ void FFTJetChannelSelector<AnalysisClass>::select(
     for (unsigned ijet=0; ijet<nJets; ++ijet)
     {
         const VectorLike& p4(recoJets_[ijet].vec());
-        if (p4.Pt() > jetPtCutoff_)
-        {
-            jetEta_.push_back(p4.Eta());
-            jetPhi_.push_back(p4.Phi());
-        }
+        jetPt_.push_back(p4.Pt());
+        jetEta_.push_back(p4.Eta());
+        jetPhi_.push_back(p4.Phi());
     }
-    const unsigned nGoodJ = jetEta_.size();
+    const double *jetPt = 0, *jetEta = 0, *jetPhi = 0;
+    if (nJets)
+    {
+        jetPt = &jetPt_[0];
+        jetEta = &jetEta_[0];
+        jetPhi = &jetPhi_[0];
+    }
 
     // Cycle over all channels again and see if the channel is close
     // to some jet which passes the jet selection cuts
+    const unsigned char zero = 0;
+    const unsigned char one = 1;
     for (int i=0; i<event.PulseCount; ++i)
     {
         const unsigned chNum = event.getHBHEChannelNumber(i);
         const TVector3& dir(geometry_.getDirection(chNum));
         const double eta = dir.Eta();
         const double phi = dir.Phi();
-        unsigned char isClose = 0;
-        for (unsigned ijet=0; ijet<nGoodJ && !isClose; ++ijet)
+
+        unsigned closestJet = 0;
+        double closestJetDistance = DBL_MAX;
+        for (unsigned ijet=0; ijet<nJets; ++ijet)
         {
-            const double dEta = (eta - jetEta_[ijet])/etaConeSize_;
-            const double dPhi = nta::deltaPhi(phi, jetPhi_[ijet])/phiConeSize_;
-            isClose = dEta*dEta + dPhi*dPhi < 1.0;
+            const double dEta = (eta - jetEta[ijet])/etaConeSize_;
+            const double dPhi = nta::deltaPhi(phi, jetPhi[ijet])/phiConeSize_;
+            const double dRSq = dEta*dEta + dPhi*dPhi;
+            if (dRSq < closestJetDistance)
+            {
+                closestJet = ijet;
+                closestJetDistance = dRSq;
+            }
         }
-        mask->push_back(isClose);
+
+        if (closestJetDistance < 1.0)
+        {
+            if (jetPt[closestJet] > jetPtCutoff_)
+                mask->push_back(one);
+            else
+                mask->push_back(zero);
+            if (parentPt)
+                parentPt->push_back(jetPt[closestJet]);
+        }
+        else
+        {
+            mask->push_back(zero);
+            if (parentPt)
+                parentPt->push_back(0.0);
+        }
     }
 }

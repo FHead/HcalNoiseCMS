@@ -222,11 +222,11 @@ int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
     }
 
     // Select "good" channels
-    if (channelSelector_)
-    {
-        channelSelector_->select(*this, &channelSelectionMask_);
-        fillJetSummary(&jetSummary_);
-    }
+    assert(channelSelector_);
+    channelSelector_->select(*this, &channelSelectionMask_, &parentObjectPt_);
+
+    // Jet summary will be filled only if we redo jet reconstruction
+    fillJetSummary(&jetSummary_);
 
     // Code which depends on charge mixing
     if (!options_.disableChargeMixing)
@@ -398,6 +398,7 @@ void MixedChargeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                      Column("Energy",          ElementOf(this->Energy)),
                      Column("RecHitTime",      ElementOf(this->RecHitTime)),
                      Column("selected",        ElementOf(channelSelectionMask_)),
+                     Column("jetHadPt",        ElementOf(parentObjectPt_)),
                      Column("charge",          ElementOf(chargeBeforeMixing_)),
                      Column("preCharge",       ElementOf(preCharge_)),
                      Column("postCharge",      ElementOf(postCharge_)),
@@ -420,6 +421,7 @@ void MixedChargeAnalysis<Options,RootMadeClass>::bookManagedHistograms()
                      Column("Energy",          ElementOf(this->Energy)),
                      Column("RecHitTime",      ElementOf(this->RecHitTime)),
                      Column("selected",        ElementOf(channelSelectionMask_)),
+                     Column("jetHadPt",        ElementOf(parentObjectPt_)),
                      Column("charge",          ElementOf(chargeBeforeMixing_)),
                      Column("preCharge",       ElementOf(preCharge_)),
                      Column("postCharge",      ElementOf(postCharge_))

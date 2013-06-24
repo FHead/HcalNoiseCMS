@@ -29,7 +29,8 @@ public:
     inline virtual ~FFTJetChannelSelector() {}
 
     virtual void select(const AnalysisClass& event,
-                        std::vector<unsigned char>* mask);
+                        std::vector<unsigned char>* mask,
+                        std::vector<double>* associatedJetPt);
 
     inline const std::vector<Jet>& getJets() const {return recoJets_;}
     inline const VectorLike& unclusteredP4() const {return unclustered_;}
@@ -80,7 +81,8 @@ private:
     // The vector of reconstructed jets (we will refill it in every event)
     std::vector<Jet> recoJets_;
 
-    // Jet eta and phi for jets that pass selection requirements
+    // Jet pt, eta and phi for fast access
+    std::vector<double> jetPt_;
     std::vector<double> jetEta_;
     std::vector<double> jetPhi_;
 

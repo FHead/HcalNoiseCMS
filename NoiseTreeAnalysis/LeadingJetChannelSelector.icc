@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cassert>
+#include <cfloat>
 
 template <class AnalysisClass>
 LeadingJetChannelSelector<AnalysisClass>::LeadingJetChannelSelector(
@@ -17,41 +18,46 @@ LeadingJetChannelSelector<AnalysisClass>::LeadingJetChannelSelector(
 
 template <class AnalysisClass>
 void LeadingJetChannelSelector<AnalysisClass>::select(
-    const AnalysisClass& event, std::vector<unsigned char>* mask)
+    const AnalysisClass& event, std::vector<unsigned char>* mask,
+    std::vector<double>* parentPt)
 {
     assert(mask);
     mask->clear();
     mask->reserve(event.PulseCount);
 
-    double jetEta[2], jetPhi[2];
+    if (parentPt)
+    {
+        parentPt->clear();
+        parentPt->reserve(event.PulseCount);
+    }
+
+    double jetEta[2], jetPhi[2], jetPt[2];
     unsigned jetCount = 0;
 
     if (event.LeadingJetPt > 0.0)
     {
         const double e = event.LeadingJetPt*cosh(event.LeadingJetEta);
         const double hfrac = event.LeadingJetHad/e;
-        const double hadPt = event.LeadingJetPt*hfrac;
-        if (hadPt > hadronicPtCutoff_)
-        {
-            jetEta[jetCount] = event.LeadingJetEta;
-            jetPhi[jetCount] = event.LeadingJetPhi;
-            ++jetCount;
-        }
+
+        jetPt[jetCount]  = event.LeadingJetPt*hfrac;
+        jetEta[jetCount] = event.LeadingJetEta;
+        jetPhi[jetCount] = event.LeadingJetPhi;
+        ++jetCount;
     }
 
     if (event.FollowingJetPt > 0.0)
     {
         const double e = event.FollowingJetPt*cosh(event.FollowingJetEta);
         const double hfrac = event.FollowingJetHad/e;
-        const double hadPt = event.FollowingJetPt*hfrac;
-        if (hadPt > hadronicPtCutoff_)
-        {
-            jetEta[jetCount] = event.FollowingJetEta;
-            jetPhi[jetCount] = event.FollowingJetPhi;
-            ++jetCount;
-        }
+
+        jetPt[jetCount]  = event.FollowingJetPt*hfrac;
+        jetEta[jetCount] = event.FollowingJetEta;
+        jetPhi[jetCount] = event.FollowingJetPhi;
+        ++jetCount;
     }
 
+    const unsigned char zero = 0;
+    const unsigned char one = 1;
     if (jetCount)
     {
         for (int i=0; i<event.PulseCount; ++i)
@@ -60,20 +66,48 @@ void LeadingJetChannelSelector<AnalysisClass>::select(
             const TVector3& dir(geometry_.getDirection(chNum));
             const double eta = dir.Eta();
             const double phi = dir.Phi();
-            unsigned char isClose = 0;
-            for (unsigned ijet=0; ijet<jetCount && !isClose; ++ijet)
+
+            // Which jet is closest to this channel in eta-phi space?
+            unsigned closestJet = 0;
+            double closestJetDistance = DBL_MAX;
+            for (unsigned ijet=0; ijet<jetCount; ++ijet)
             {
                 const double dEta = (eta - jetEta[ijet])/etaConeSize_;
                 const double dPhi = nta::deltaPhi(phi, jetPhi[ijet])/phiConeSize_;
-                isClose = dEta*dEta + dPhi*dPhi < 1.0;
+                const double dRSq = dEta*dEta + dPhi*dPhi;
+                if (dRSq < closestJetDistance)
+                {
+                    closestJet = ijet;
+                    closestJetDistance = dRSq;
+                }
             }
-            mask->push_back(isClose);
+
+            // If the channel is sufficiently close to a jet,
+            // associate it with that jet
+            if (closestJetDistance < 1.0)
+            {
+                if (jetPt[closestJet] > hadronicPtCutoff_)
+                    mask->push_back(one);
+                else
+                    mask->push_back(zero);
+                if (parentPt)
+                    parentPt->push_back(jetPt[closestJet]);
+            }
+            else
+            {
+                mask->push_back(zero);
+                if (parentPt)
+                    parentPt->push_back(0.0);
+            }
         }
     }
     else
     {
-        const unsigned char zero = 0;
         for (int i=0; i<event.PulseCount; ++i)
+        {
             mask->push_back(zero);
+            if (parentPt)
+                parentPt->push_back(0.0);
+        }
     }
 }

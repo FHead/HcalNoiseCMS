@@ -12,7 +12,8 @@ public:
     inline virtual ~LeadingJetChannelSelector() {}
 
     virtual void select(const AnalysisClass& event,
-                        std::vector<unsigned char>* mask);
+                        std::vector<unsigned char>* mask,
+                        std::vector<double>* parentPt);
 private:
     LeadingJetChannelSelector();
 

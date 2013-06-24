@@ -152,6 +152,9 @@ private:
     // Mask to be used for selection of good channels
     std::vector<unsigned char> channelSelectionMask_;
 
+    // Parent object Pt for the channels
+    std::vector<double> parentObjectPt_;
+
     // The charge mixing manager
     ChargeMixingManager<RootMadeClass>* mixManager_;
 
