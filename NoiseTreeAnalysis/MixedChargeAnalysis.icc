@@ -221,9 +221,15 @@ int MixedChargeAnalysis<Options,RootMadeClass>::event(Long64_t entryNumber)
             charge+options_.minPostTS, charge+options_.maxPostTS, 0.0);
     }
 
-    // Select "good" channels
+    // Select "good" channels with the channel selector
     assert(channelSelector_);
     channelSelector_->select(*this, &channelSelectionMask_, &parentObjectPt_);
+
+    // Add the "RecHitTime" selection
+    for (Int_t i=0; i<this->PulseCount; ++i)
+        if (!(this->RecHitTime[i] > options_.minRecHitTime &&
+              this->RecHitTime[i] < options_.maxRecHitTime))
+            channelSelectionMask_[i] = 0;
 
     // Jet summary will be filled only if we redo jet reconstruction
     fillJetSummary(&jetSummary_);

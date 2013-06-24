@@ -53,6 +53,8 @@ struct MixedChargeAnalysisOptions
           coneSize(0.5),
           peakEtCutoff(5.0),
           jetPtCutoff(20.0),
+          minRecHitTime(-1.0e30),
+          maxRecHitTime(1.0e30),
           randomSeed(0UL),
           centralTS(4),
           minResponseTS(4),
@@ -89,6 +91,8 @@ struct MixedChargeAnalysisOptions
         cmdline.option(NULL, "--coneSize") >> coneSize;
         cmdline.option(NULL, "--peakEtCutoff") >> peakEtCutoff;
         cmdline.option(NULL, "--jetPtCutoff") >> jetPtCutoff;
+        cmdline.option(NULL, "--minRecHitTime") >> minRecHitTime;
+        cmdline.option(NULL, "--maxRecHitTime") >> maxRecHitTime;
 
         cmdline.option("-r", "--randomSeed") >> randomSeed;
         cmdline.option(NULL, "--filterFile") >> filterFile;
@@ -117,6 +121,8 @@ struct MixedChargeAnalysisOptions
            << " [--coneSize value]"
            << " [--peakEtCutoff value]"
            << " [--jetPtCutoff value]"
+           << " [--minRecHitTime value]"
+           << " [--maxRecHitTime value]"
            << " [--filterFile filename]"
            << " [--channelArchive archiveName]"
            << " [--centralTS value]"
@@ -174,6 +180,10 @@ struct MixedChargeAnalysisOptions
            << "                     Default is 5.0.\n\n";
         os << " --jetPtCutoff       Minimum transverse momentum for \"good\" jets. Default\n"
            << "                     value is 20.0.\n\n";
+        os << " --minRecHitTime     Minimum RecHitTime for \"good\" channels. Default is\n"
+           << "                     a negative number of large magnitude (all channels pass).\n\n";
+        os << " --maxRecHitTime     Maximum RecHitTime for \"good\" channels. Default is\n"
+           << "                     a large positive number (all channels pass).\n\n";
         os << " --centralTS         The \"central\" time slice (default is 4). The program\n"
            << "                     will check that the generated time shifts will not move\n"
            << "                     the central TS outside of observable range.\n\n";
@@ -206,6 +216,8 @@ struct MixedChargeAnalysisOptions
     double coneSize;
     double peakEtCutoff;
     double jetPtCutoff;
+    double minRecHitTime;
+    double maxRecHitTime;
 
     unsigned long randomSeed;
     int centralTS;
@@ -233,6 +245,8 @@ std::ostream& operator<<(std::ostream& os, const MixedChargeAnalysisOptions& o)
        << ", coneSize = \"" << o.coneSize << '"'
        << ", peakEtCutoff = \"" << o.peakEtCutoff << '"'
        << ", jetPtCutoff = \"" << o.jetPtCutoff << '"'
+       << ", minRecHitTime = \"" << o.minRecHitTime << '"'
+       << ", maxRecHitTime = \"" << o.maxRecHitTime << '"'
        << ", randomSeed = " << o.randomSeed
        << ", centralTS = " << o.centralTS
        << ", minResponseTS = " << o.minResponseTS
