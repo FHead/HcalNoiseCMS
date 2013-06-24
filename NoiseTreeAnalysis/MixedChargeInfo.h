@@ -47,7 +47,8 @@ public:
 
     // Function which adds one event with the given time slice shift.
     // Will be used by "ChargeMixingManager" to add charge incrementally.
-    void addEvent(std::shared_ptr<const EventChargeInfo> eventInfo, int tsShift);
+    void addEvent(std::shared_ptr<const EventChargeInfo> eventInfo, int tsShift,
+                  double scaleFactor=1.0);
 
     // Function which clears all collected information.
     // Does not clear configuration options (i.e., constructor parameters).

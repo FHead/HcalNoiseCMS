@@ -88,7 +88,8 @@ public:
     // for every event.
     virtual void prepareMix(npstat::AbsRandomGenerator& rng,
                             const HBHEChannelMap& chmap,
-                            MixedChargeInfo* info) const;
+                            MixedChargeInfo* info,
+                            double chargeScaleFactor=1.0) const;
 private:
     typedef std::shared_ptr<const EventChargeInfo> EPtr;
 

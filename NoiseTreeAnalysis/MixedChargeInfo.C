@@ -10,7 +10,7 @@ MixedChargeInfo::MixedChargeInfo(const bool mixExtraChannels,
 }
 
 void MixedChargeInfo::addEvent(std::shared_ptr<const EventChargeInfo> eventInfo,
-                               const int tsShift)
+                               const int tsShift, const double scaleFactor)
 {
     eventInfos.push_back(eventInfo);
     timeSliceShifts.push_back(tsShift);
@@ -49,11 +49,11 @@ void MixedChargeInfo::addEvent(std::shared_ptr<const EventChargeInfo> eventInfo,
 
         ++addedReadouts[idx];
         ++addedReadoutsTS[idx][ts];
-        addedEnergy[idx][ts] += ch.Energy;
+        addedEnergy[idx][ts] += scaleFactor*ch.Energy;
 
         // Add the charge
         for (unsigned i=0; i<nTimeSlices; ++i)
-            addedCharge[idx][i] += ch.Charge[fromIndex[i]];
+            addedCharge[idx][i] += scaleFactor*ch.Charge[fromIndex[i]];
     }
 }
 

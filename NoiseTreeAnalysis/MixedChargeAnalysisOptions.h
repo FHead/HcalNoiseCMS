@@ -53,6 +53,7 @@ struct MixedChargeAnalysisOptions
           coneSize(0.5),
           peakEtCutoff(5.0),
           jetPtCutoff(20.0),
+          chargeScaleFactor(1.0),
           minRecHitTime(-1.0e30),
           maxRecHitTime(1.0e30),
           randomSeed(0UL),
@@ -91,6 +92,7 @@ struct MixedChargeAnalysisOptions
         cmdline.option(NULL, "--coneSize") >> coneSize;
         cmdline.option(NULL, "--peakEtCutoff") >> peakEtCutoff;
         cmdline.option(NULL, "--jetPtCutoff") >> jetPtCutoff;
+        cmdline.option(NULL, "--chargeScaleFactor") >> chargeScaleFactor;
         cmdline.option(NULL, "--minRecHitTime") >> minRecHitTime;
         cmdline.option(NULL, "--maxRecHitTime") >> maxRecHitTime;
 
@@ -121,6 +123,7 @@ struct MixedChargeAnalysisOptions
            << " [--coneSize value]"
            << " [--peakEtCutoff value]"
            << " [--jetPtCutoff value]"
+           << " [--chargeScaleFactor value]"
            << " [--minRecHitTime value]"
            << " [--maxRecHitTime value]"
            << " [--filterFile filename]"
@@ -180,6 +183,7 @@ struct MixedChargeAnalysisOptions
            << "                     Default is 5.0.\n\n";
         os << " --jetPtCutoff       Minimum transverse momentum for \"good\" jets. Default\n"
            << "                     value is 20.0.\n\n";
+        os << " --chargeScaleFactor Charge scale factor for mixed events. Default is 1.0.\n\n";
         os << " --minRecHitTime     Minimum RecHitTime for \"good\" channels. Default is\n"
            << "                     a negative number of large magnitude (all channels pass).\n\n";
         os << " --maxRecHitTime     Maximum RecHitTime for \"good\" channels. Default is\n"
@@ -216,6 +220,7 @@ struct MixedChargeAnalysisOptions
     double coneSize;
     double peakEtCutoff;
     double jetPtCutoff;
+    double chargeScaleFactor;
     double minRecHitTime;
     double maxRecHitTime;
 
@@ -245,6 +250,7 @@ std::ostream& operator<<(std::ostream& os, const MixedChargeAnalysisOptions& o)
        << ", coneSize = \"" << o.coneSize << '"'
        << ", peakEtCutoff = \"" << o.peakEtCutoff << '"'
        << ", jetPtCutoff = \"" << o.jetPtCutoff << '"'
+       << ", chargeScaleFactor = \"" << o.chargeScaleFactor << '"'
        << ", minRecHitTime = \"" << o.minRecHitTime << '"'
        << ", maxRecHitTime = \"" << o.maxRecHitTime << '"'
        << ", randomSeed = " << o.randomSeed

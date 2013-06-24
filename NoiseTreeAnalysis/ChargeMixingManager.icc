@@ -99,7 +99,8 @@ bool ChargeMixingManager<RootMadeClass>::loadEventsToMix(
 template <class RootMadeClass>
 void ChargeMixingManager<RootMadeClass>::prepareMix(
     npstat::AbsRandomGenerator& rng,
-    const HBHEChannelMap& chmap, MixedChargeInfo* info) const
+    const HBHEChannelMap& chmap, MixedChargeInfo* info,
+    const double chargeScaleFactor) const
 {
     assert(info);
     info->clear();
@@ -122,7 +123,7 @@ void ChargeMixingManager<RootMadeClass>::prepareMix(
         if (eventNum >= sz)
             eventNum = sz - 1;
         tsShiftDistro->random(rng, &tsShift);
-        info->addEvent(events[eventNum], tsShift);
+        info->addEvent(events[eventNum], tsShift, chargeScaleFactor);
         ++nMixed;
     }
 }

@@ -452,7 +452,8 @@ template <class Options, class RootMadeClass>
 int MixedChargeAnalysis<Options,RootMadeClass>::mixExtraCharge()
 {
     assert(mixManager_);
-    mixManager_->prepareMix(*rng_, channelMap_, &mixInfo_);
+    mixManager_->prepareMix(*rng_, channelMap_, &mixInfo_,
+                            options_.chargeScaleFactor);
     return mixInfo_.mixWithData<RootMadeClass>(channelMap_, this);
 }
 
