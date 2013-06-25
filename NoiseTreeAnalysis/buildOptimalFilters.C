@@ -64,6 +64,39 @@ static void print_usage(const char* progname)
          << " filterOrder minPredictorTS maxPredictorTS"
          << " inputArchive fileToStoreFilters rootfile\n"
          << endl;
+
+    cout << "The required command line arguments are:\n\n"
+         << " filterOrder         The degree of the constructed filter: 1 for linear\n"
+         << "                     filter in charge time slices, 2 for quadratic.\n\n"
+         << " minPredictorTS      The minimum time slice (included) to use for predicting\n"
+         << "                     the charge before mixing.\n\n"
+         << " maxPredictorTS      The maximum time slice (excluded) to use for predicting\n"
+         << "                     the charge before mixing.\n\n"
+         << " inputArchive        The archive which contains selected channel data.\n"
+         << "                     Should be produced by \"runMixedChargeAnalysis\"\n"
+         << "                     executable with option --channelArchive.\n\n"
+         << " fileToStoreFilters  The name of the binary file in which optimal filters\n"
+         << "                     will be stored.\n\n"
+         << " rootfile            File for storing some filter-related histograms/ntuples.\n"
+         << endl;
+
+    cout << "Available command line options are:\n\n"
+         << " -a, -b, -c  Coefficients for the effective charge uncertainty model. This\n"
+         << "             uncertainty will be calculated as a*Q + b*sqrt(Q) + c, where Q\n"
+         << "             is the channel charge before mixing. These options are required.\n\n"
+         << " -n          Minimum number of events to require for fitting the regression\n"
+         << "             model to channel data. Default value of this option ensures that\n"
+         << "             there are more events than parameters to fit.\n\n"
+         << " -m          Maximum number of events for constructing the regression model\n"
+         << "             for fitting channel data. If more events are found, they will\n"
+         << "             be ignored. Default value of this option is 1000000.\n\n"
+         << " -s          To avoid potential problems due to insufficient computer memory,\n"
+         << "             channels are fitted in small groups rather than all together.\n"
+         << "             This parameter sprecifies how many channels will be fitted\n"
+         << "             simultaneously. Default is 10.\n\n"
+         << " -v          Verbose switch: print some diagnostics to the standard output\n"
+         << "             as the program runs.\n"
+         << endl;
 }
 
 
